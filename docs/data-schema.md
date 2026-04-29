@@ -71,7 +71,7 @@
 | `width_px` / `height_px` | INT | ✓ | |
 | `file_size_bytes` | BIGINT | ✓ | |
 | `sha256` | TEXT | ✓ | 內容雜湊 |
-| `gps_lat` / `gps_lon` | DOUBLE | ○ | |
+| `gps_lat` / `gps_lon` | DOUBLE | ○ | DB 永遠儲存原始值；遮蔽在 API serialization 時做（見下方註） |
 | `exif_json` | JSONB | ○ | 完整 EXIF |
 | `scale_object_type` | ENUM | ◎ | 葉片必填 |
 | `scale_object_size_mm` | DOUBLE | ◎ | 葉片必填 |
@@ -81,6 +81,8 @@
 | `quality_issues` | TEXT[] | ○ | `blurry`/`overexposed`/`dark`/`low_res` |
 | `note` | TEXT | ○ | |
 | `created_at` | TIMESTAMPTZ | ✓ | |
+
+> **GPS 隱私政策（[ADR-0001 議題 5](decisions/0001-open-questions.md)）**：`gps_lat` / `gps_lon` 欄位在 DB 中**永遠儲存原始值**，**不**在 DB 層遮蔽。API serialization 階段依呼叫者角色動態裁切：admin → `exact`、認證研究者 → `town`、公開/訪客 → `county`，並於回應中附 `gps_precision` 欄位。同樣規則適用於 `tree.lat` / `tree.lon`、`site.centroid_lat` / `site.centroid_lon`。
 
 ### 四、analysis_run（推論執行）
 
@@ -139,34 +141,37 @@
 
 #### LeafDefect 欄位（影像層級平均）
 
-| 欄位 | 型別 | 範圍 |
-|------|------|------|
-| `lesion_ratio_mean` | DOUBLE | 0~1 |
-| `chlorosis_ratio_mean` | DOUBLE | 0~1 |
-| `necrosis_ratio_mean` | DOUBLE | 0~1 |
-| `hole_ratio_mean` | DOUBLE | 0~1 |
-| `total_defect_ratio_mean` | DOUBLE | 0~1 |
-| `health_score_mean` | DOUBLE | 0~100 |
-| `health_grade` | CHAR(1) | A~E |
+| 欄位 | 型別 | 必填 | 範圍 | 說明 |
+|------|------|------|------|------|
+| `lesion_ratio_mean` | DOUBLE | ✓ | 0~1 | |
+| `chlorosis_ratio_mean` | DOUBLE | ✓ | 0~1 | |
+| `necrosis_ratio_mean` | DOUBLE | ✓ | 0~1 | |
+| `hole_ratio_mean` | DOUBLE | ✓ | 0~1 | |
+| `total_defect_ratio_mean` | DOUBLE | ✓ | 0~1 | |
+| `health_score_global_mean` | DOUBLE | ✓ | 0~100 | 全域權重健康分數的影像平均，公式見 SPEC §伍-三 |
+| `health_score_species_mean` | DOUBLE | ○ | 0~100 | 樹種特化權重健康分數（v1 為 NULL，待校正後填入） |
+| `health_grade` | CHAR(1) | ✓ | A~E | 由 `health_score_global_mean` 計算 |
+| `weights_config_id` | TEXT | ✓ | | 對應 `models/LeafDefect/config.yaml` 的 `health_weights` 版本識別，供推論結果可追溯到使用的權重 |
 
 ### 六、leaf_instance（葉片實例）
 
-| 欄位 | 型別 | 說明 |
-|------|------|------|
-| `instance_id` | UUID PK | |
-| `image_id` | UUID FK | |
-| `polygon_json` | JSONB | 多邊形座標 |
-| `bbox_json` | JSONB | `[x,y,w,h]` |
-| `area_px` | BIGINT | |
-| `area_cm2` | DOUBLE | |
-| `length_mm` | DOUBLE | |
-| `width_mm` | DOUBLE | |
-| `lesion_ratio` | DOUBLE | |
-| `chlorosis_ratio` | DOUBLE | |
-| `necrosis_ratio` | DOUBLE | |
-| `hole_ratio` | DOUBLE | |
-| `health_score` | DOUBLE | |
-| `health_grade` | CHAR(1) | |
+| 欄位 | 型別 | 必填 | 說明 |
+|------|------|------|------|
+| `instance_id` | UUID PK | ✓ | |
+| `image_id` | UUID FK | ✓ | |
+| `polygon_json` | JSONB | ✓ | 多邊形座標（葉柄併入葉片實例，邊界沿葉柄外緣，[ADR-0001 議題 2](decisions/0001-open-questions.md)） |
+| `bbox_json` | JSONB | ✓ | `[x,y,w,h]` |
+| `area_px` | BIGINT | ✓ | |
+| `area_cm2` | DOUBLE | ✓ | |
+| `length_mm` | DOUBLE | ○ | |
+| `width_mm` | DOUBLE | ○ | |
+| `lesion_ratio` | DOUBLE | ○ | |
+| `chlorosis_ratio` | DOUBLE | ○ | |
+| `necrosis_ratio` | DOUBLE | ○ | |
+| `hole_ratio` | DOUBLE | ○ | |
+| `health_score_global` | DOUBLE | ✓（有 LeafDefect 推論時）| 全域權重健康分數，0~100 |
+| `health_score_species` | DOUBLE | ○ | 樹種特化權重健康分數（v1 為 NULL） |
+| `health_grade` | CHAR(1) | ○ | 由 `health_score_global` 計算 |
 
 ### 七、tree_daily_summary（單棵樹單日彙總）
 
@@ -182,8 +187,9 @@
 | `brown_ratio_mean` | DOUBLE | |
 | `leaf_count_total` | INT | |
 | `leaf_area_mean_cm2` | DOUBLE | |
-| `health_score_mean` | DOUBLE | |
-| `health_grade` | CHAR(1) | 由分數計算 |
+| `health_score_global_mean` | DOUBLE | 全域權重健康分數的當日平均（v1 必填） |
+| `health_score_species_mean` | DOUBLE | 樹種特化權重的當日平均（v1 為 NULL） |
+| `health_grade` | CHAR(1) | 由 `health_score_global_mean` 計算（v1.5 起若 `health_score_species_mean` 已填入，則改用 species 版本） |
 | `risk_flag` | BOOL | 是否進入高風險清單 |
 | `risk_reasons` | TEXT[] | 例：`['high_yellow','low_health']` |
 

@@ -1,0 +1,179 @@
+# ============================================================
+# LeafDefect — 訓練、推論、健康分數權重設定
+# ------------------------------------------------------------
+# 文件版本 : v0.1（草案）
+# 文件日期 : 2026-04-29
+# 對應規格 : ../../docs/SPEC.md  §伍-三、§玖-一
+# 對應 ADR : ../../docs/decisions/0001-open-questions.md  §議題 3
+# ------------------------------------------------------------
+# 本檔為「兩階段健康分數設計」的單一事實來源（single source of
+# truth）。權重 **不得寫死於程式碼** —— 推論服務必須從本檔載入。
+# ============================================================
+
+meta:
+  model_id: LeafDefect
+  version: v0.1.0           # SemVer；MAJOR 變更 = schema 不相容
+  task: leaf_defect          # 對應 model_task_t enum
+  framework: pytorch
+  task_type: semantic_segmentation_multilabel
+  description: |
+    葉片病徵多標籤語意分割（病斑 / 黃化 / 壞死 / 破洞），輸出每片
+    葉的 4 個病徵比例與兩組健康分數（global / species）。
+
+# ------------------------------------------------------------
+# 類別定義（與 docs/SPEC.md §伍-三、annotation-guideline.md 對齊）
+# ------------------------------------------------------------
+classes:
+  - { id: 0, name: lesion,    zh: 病斑, channel: 0 }
+  - { id: 1, name: chlorosis, zh: 黃化, channel: 1 }
+  - { id: 2, name: necrosis, zh: 壞死, channel: 2 }
+  - { id: 3, name: hole,      zh: 破洞, channel: 3 }
+
+# ------------------------------------------------------------
+# 健康分數權重（[ADR-0001 議題 3](../../docs/decisions/0001-open-questions.md)）
+# ------------------------------------------------------------
+# 雙階段設計：
+#   v1   ─ 所有樹種共用 health_weights.global（必填）
+#   v1.5 ─ 對樣本量足夠（≥ 100 片標註葉 × 多時段）的樹種
+#          在 health_weights.species.<species_sci> 補上
+#          專屬權重；推論時若樹種命中則同時輸出
+#          health_score_global 與 health_score_species；
+#          否則 health_score_species 留 null。
+#
+# 約束：每組權重必須非負且總和 == 1.0（容差 1e-6）。
+# 推論服務啟動時應驗證；驗證失敗則拒絕載入。
+# ------------------------------------------------------------
+health_weights:
+  schema_version: 1          # 權重結構版本（與 model 版本獨立）
+  formula: |
+    score = 100 - 100 * (
+      w_lesion    * lesion_ratio
+      + w_necrosis  * necrosis_ratio
+      + w_chlorosis * chlorosis_ratio
+      + w_hole      * hole_ratio
+    )
+    clamp 至 [0, 100]
+
+  # v1 全域權重（文獻常見值；後續以場域實證資料校正）
+  global:
+    lesion:    0.40
+    necrosis:  0.30
+    chlorosis: 0.20
+    hole:      0.10
+
+  # 樹種特化權重（v1 全空；v1.5+ 由場域校正後填入）
+  # key 採學名（species_sci），與 tree.species_sci 對齊。
+  species: {}
+  # 範例（v1.5+ 啟用後形如下；目前不啟用）：
+  # species:
+  #   "Cunninghamia konishii":     # 台灣杉
+  #     lesion: 0.35
+  #     necrosis: 0.40             # 針葉樹壞死權重提高
+  #     chlorosis: 0.15
+  #     hole: 0.10
+  #     calibrated_at: "2026-09-01"
+  #     sample_size: 120
+  #     reviewer: "Dr. XX"
+
+  # 健康分數分級（A~E）統一以 health_score_global 計算，
+  # 確保跨樹種、跨版本可比性（見 docs/SPEC.md §伍-三）。
+  grade_thresholds:
+    A: [90, 100]
+    B: [75,  89]
+    C: [60,  74]
+    D: [40,  59]
+    E: [ 0,  39]
+
+# ------------------------------------------------------------
+# 訓練設定
+# ------------------------------------------------------------
+training:
+  backbone: resnet50
+  architecture: deeplabv3plus    # 替代：unet / segformer-b2
+  pretrained: imagenet
+  input_size: [512, 512]         # 葉片 ROI 已由 LeafInst 切出
+  batch_size: 16
+  epochs: 80
+  optimizer:
+    name: adamw
+    lr: 0.0003
+    weight_decay: 0.0001
+  scheduler:
+    name: cosine
+    warmup_epochs: 3
+  loss:
+    # multi-label 採 BCE + Dice 混合
+    bce_weight: 0.5
+    dice_weight: 0.5
+    # 類別不平衡：壞死 / 破洞樣本少
+    pos_weight:
+      lesion:    1.0
+      chlorosis: 1.0
+      necrosis:  2.0
+      hole:      3.0
+  augmentation:
+    color_jitter: { brightness: 0.2, contrast: 0.2, saturation: 0.2, hue: 0.05 }
+    random_flip: true
+    random_rotate_deg: 15
+    cutout_prob: 0.2
+
+  # 資料路徑（皆相對於 TREEVISION_DATA_ROOT）
+  data:
+    root_env: TREEVISION_DATA_ROOT
+    train_split: annotations/leaf_closeup/train.coco.json
+    val_split:   annotations/leaf_closeup/val.coco.json
+    test_split:  annotations/leaf_closeup/test.coco.json
+    image_dir:   processed/leaf_closeup
+    mask_dir:    leaf_closeup/masks
+
+# ------------------------------------------------------------
+# 評估門檻（對應 docs/SPEC.md §玖-一）
+# ------------------------------------------------------------
+evaluation:
+  metrics:
+    per_class_iou:
+      lesion:    { target: 0.55, hard_min: 0.45 }
+      chlorosis: { target: 0.55, hard_min: 0.45 }
+      necrosis:  { target: 0.55, hard_min: 0.45 }
+      hole:      { target: 0.55, hard_min: 0.45 }
+    health_score_correlation:
+      method: spearman
+      target_rho: 0.75
+      against: expert_score      # 由標註者打分的專家評分
+  failure_handling: |
+    任一 hard_min 未達 → 模型不釋出，回到資料補強或標註校核。
+
+# ------------------------------------------------------------
+# 推論與部署
+# ------------------------------------------------------------
+inference:
+  device_priority: [cuda, cpu]
+  batch_size: 4
+  threshold:
+    # 多標籤每通道二值化門檻
+    lesion:    0.5
+    chlorosis: 0.5
+    necrosis:  0.5
+    hole:      0.5
+  postprocess:
+    min_blob_px: 30              # 小於此面積的連通域視為雜訊
+    fill_holes: false
+  expected_latency_seconds:
+    gpu: 5
+    cpu: 30
+
+export:
+  format: onnx                   # 部署用
+  opset: 17
+  output_path: models/LeafDefect/exports/leafdefect_v0_1_0.onnx
+  dynamic_axes: { input: { 0: batch }, output: { 0: batch } }
+
+# ------------------------------------------------------------
+# 變更紀錄
+# ------------------------------------------------------------
+changelog:
+  - version: v0.1.0
+    date: 2026-04-29
+    notes: |
+      初版骨架；health_weights.global 採 ADR-0001 議題 3 v1 共識值，
+      species 區塊保留為空，待 v1.5+ 校正後填入。
