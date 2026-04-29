@@ -20,16 +20,17 @@
 
 ## 貳、里程碑明細
 
-### 階段 0：規格定稿（2026-05）
+### 階段 0：規格定稿（2026-04 ~ 05）
 
-| 任務 | 產出 | 負責 |
+| 任務 | 產出 | 狀態 |
 |------|------|------|
-| 工程規格書 v0.1 | `docs/SPEC.md` | 主持人 + AI 助理 |
-| 資料 schema v0.1 | `docs/data-schema.md` + `schemas/*.json` | 工程 + 資料 |
-| 標註規範 v0.1 | `docs/annotation-guideline.md` | 主持人 |
-| 利害關係人 review | 修訂為 v0.2 | 全員 |
+| 工程規格書 v0.1 | [docs/SPEC.md](SPEC.md) | ✅ 完成 |
+| 資料 schema v0.1 | [docs/data-schema.md](data-schema.md) + [schemas/*.json](../schemas/) | ✅ 完成（含 ADR-0001 議題 3 落地） |
+| 標註規範 v0.2 | [docs/annotation-guideline.md](annotation-guideline.md) | ✅ 完成（含 ADR-0001 議題 2 落地） |
+| 7 項開放問題決議 | [ADR-0001](decisions/0001-open-questions.md) | ✅ 完成 2026-04-30 |
+| 利害關係人 review | 修訂為 v0.2 | ⏳ 待安排 |
 
-**離開條件**：所有「拾貳、開放問題」中前 3 項已決議。
+**離開條件**：所有「拾貳、開放問題」中前 3 項已決議。✅ **已達成**（7 項全部決議，2026-04-30）。
 
 ### 階段 1：資料收集 + 標註（2026-05 ~ 2026-08）
 

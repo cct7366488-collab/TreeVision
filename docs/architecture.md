@@ -54,7 +54,7 @@
 
 | 模組 | 責任 | 技術 |
 |------|------|------|
-| Frontend | UI、表單驗證、圖表、報表預覽 | Next.js 14 + Tailwind + shadcn/ui + Recharts |
+| Frontend | UI、表單驗證、圖表、報表預覽；**v1 純繁中**，從第一天用 `next-intl` 預留 i18n key（依 [ADR-0001 議題 7](decisions/0001-open-questions.md#議題-7多語系)） | Next.js 14 + Tailwind + shadcn/ui + Recharts + **next-intl** |
 | Backend API | 認證、CRUD、上傳、佇列派工 | FastAPI + SQLAlchemy + Alembic |
 | Job Queue | 推論任務排程 | Celery + Redis |
 | Inference Worker | 跑 CanopySeg / LeafInst / LeafDefect | PyTorch / ONNX Runtime |
@@ -143,6 +143,11 @@ Client ──GET /reports/{id}──► API ──signed URL──► download
 - 影像 URL 一律簽名（短 TTL）
 - 機密用 Secret Manager
 - 依賴掃描（Dependabot、`pip-audit`）
+- **GPS 遮蔽 middleware**（依 [ADR-0001 議題 5](decisions/0001-open-questions.md#議題-5gps-遮蔽粒度)）：DB 永遠存原始座標，FastAPI response serializer 依 JWT 內 role 做三層遮蔽：
+  - `admin` → `gps_precision=exact`，原始座標
+  - `researcher` → `gps_precision=town`，鄉鎮中心
+  - `public` → `gps_precision=county`，縣市中心
+  - 實作位置建議：`api/middleware/gps_masking.py`，套用於所有回傳 `lat`/`lon` 的 endpoint
 
 ## 柒、備份與災難恢復
 
