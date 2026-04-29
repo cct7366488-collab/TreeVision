@@ -264,10 +264,10 @@ Multi-label semantic segmentation（同一像素可同時有多種病徵）。
 | total_defect_ratio | 任一病徵 / 葉片像素 | 0~1 |
 | **health_score** | 公式如下 | 0~100 |
 
-#### 健康分數公式（v1 版）
+#### 健康分數公式（v1 版，全域權重）
 
 ```
-health_score = 100
+health_score_global = 100
              - 100 × (
                  0.40 × lesion_ratio
                + 0.30 × necrosis_ratio
@@ -277,7 +277,11 @@ health_score = 100
 clamp 到 [0, 100]
 ```
 
-> 權重在 v1 版採文獻常見值，後續可由場域實證資料校正。
+> 依 [ADR-0001 議題 3](decisions/0001-open-questions.md) 決議採**兩階段**設計：
+>
+> - **v1**：所有樹種共用上述全域權重，輸出至 `health_score_global` 欄位（必填）。權重抽至 `models/LeafDefect/config.yaml` 的 `health_weights` 區塊，**不寫死於程式碼**。
+> - **v1.5+**：對樣本量足夠（≥ 100 片標註葉 × 多時段）的樹種推導樹種特化權重，輸出至 `health_score_species` 欄位（v1 為 NULL，校正後填入）。
+> - 兩欄位並存，保留跨版本可比性；分級表（A~E）目前以 `health_score_global` 為計算基準。
 
 #### 健康等級分級
 
@@ -397,7 +401,7 @@ AnalysisRun n ── 1 Model
 |------|------|
 | 認證 | JWT，token 24h 有效；刷新 token 30d |
 | 授權 | RBAC（admin / researcher / viewer） |
-| 影像隱私 | GPS 預設遮蔽至縣市級；原始 GPS 僅 admin 可下載 |
+| 影像隱私 | DB 永遠儲存原始 GPS；遮蔽僅在 API serialization 時做（[ADR-0001 議題 5](decisions/0001-open-questions.md)）。三層粒度：admin → `exact`、認證研究者 → `town`（鄉鎮級）、公開/訪客 → `county`（縣市級）；API 回應一律附 `gps_precision` 欄位供前端決定顯示樣式 |
 | 資料備份 | 每日增量、每週全量；保留 90 天 |
 | 稽核 | API 存取記錄存 90 天；模型推論不可變更歷史紀錄 |
 | 個資 | 不蒐集個人辨識資料；上傳者僅以 user_id 紀錄 |
@@ -475,19 +479,21 @@ AnalysisRun n ── 1 Model
 
 ---
 
-## 拾貳、開放問題（待決定）
+## 拾貳、開放問題（已決議）
 
-| # | 議題 | 方案選項 |
-|---|------|----------|
-| 1 | 是否做樹種辨識（v1 vs v2） | A. v1 不做、B. v1 做白名單 5 種 |
-| 2 | 葉片標註單位 | A. 全葉、B. 全葉 + 葉柄分開 |
-| 3 | 健康分數權重 | A. 全域固定、B. 樹種特化 |
-| 4 | 報表格式 | A. PDF 為主、B. Word 可編輯範本 |
-| 5 | GPS 遮蔽粒度 | A. 縣市級、B. 鄉鎮級、C. 不遮蔽（內網用） |
-| 6 | License | A. AGPL、B. Apache 2.0 + CC BY-NC-SA |
-| 7 | 多語系 | A. 純中文、B. 中英雙語、C. 含原住民族語 |
+下表 7 項議題已於 **2026-04-29** 由主持人裁示通過，詳見 [ADR-0001](decisions/0001-open-questions.md)。
 
-> 此表會隨開發過程動態更新，每項決議後進入 [`docs/ADR/`](ADR/) 紀錄理由。
+| # | 議題 | 決議 | 對應 ADR |
+|---|------|------|----------|
+| 1 | 樹種辨識（v1 vs v2） | **v1 不做**，schema 預留欄位（`species_zh` / `species_sci`），v2 再導入 `SpeciesId` 模型 | [§議題 1](decisions/0001-open-questions.md) |
+| 2 | 葉片標註單位 | **只標全葉**（含葉柄一體），`leaf_instance` 表保留單一 `polygon_json`，不另設 `petiole_json` | [§議題 2](decisions/0001-open-questions.md) |
+| 3 | 健康分數權重 | **兩階段**：v1 用全域固定權重（`health_score_global`，必填），v1.5 起對特定樹種推 `health_score_species`（v1 可空）；權重抽 config，從第一天就支援切換 | [§議題 3](decisions/0001-open-questions.md) |
+| 4 | 報表格式 | **PDF + CSV/Excel** 並行，`POST /reports` 增加 `format: pdf \| csv \| xlsx \| all` 參數，預設 `all` | [§議題 4](decisions/0001-open-questions.md) |
+| 5 | GPS 遮蔽粒度 | **三層雙軌制**：DB 永遠儲存原始 GPS，遮蔽僅在 API serialization 時做；admin → exact、認證研究者 → town、公開/訪客 → county；回應加 `gps_precision` 欄位 | [§議題 5](decisions/0001-open-questions.md) |
+| 6 | License | **Apache License 2.0**（已落地，見 [LICENSE](../LICENSE) / [NOTICE](../NOTICE)） | [§議題 6](decisions/0001-open-questions.md) |
+| 7 | 多語系 | **v1 繁中**，前端從第一天用 `next-intl` i18n 框架，預留英文 fallback；報表標題附英文括號注記（例如「健康分數 (Health Score)」） | [§議題 7](decisions/0001-open-questions.md) |
+
+> 翻案規則：不直接修改 ADR-0001；改開新 ADR `superseded by NNNN`。新增議題時在本表追加列並建立對應 ADR。
 
 ---
 

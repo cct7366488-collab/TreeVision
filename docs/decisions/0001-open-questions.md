@@ -4,8 +4,9 @@
 |------|----|
 | 編號 | 0001 |
 | 標題 | SPEC 開放問題的初版建議 |
-| 狀態 | proposed |
+| 狀態 | accepted |
 | 日期 | 2026-04-29 |
+| 決議日 | 2026-04-29 |
 | 提案人 | TreeVision Contributors |
 | 對應 SPEC 章節 | [docs/SPEC.md 第拾貳章](../SPEC.md) |
 
@@ -197,5 +198,10 @@
 
 ## 後續
 
-- 主持人 review 此 ADR → 同意則狀態改為 `accepted`，並更新 [SPEC.md 第拾貳章](../SPEC.md) 為「已決議」並指向本 ADR。
-- 不同意處 → 在本檔加註說明，或開新 ADR 覆蓋。
+- 本 ADR 於 **2026-04-29** 由主持人裁示通過，狀態 `proposed` → `accepted`。
+- [SPEC.md 第拾貳章](../SPEC.md) 已同步改寫為「已決議」並回連本 ADR 各議題。
+- 議題 3、4、5 之 schema / API 後果已落地（見本檔各議題 Consequences），對應檔案：
+  - [docs/data-schema.md](../data-schema.md)（健康分數雙欄位、GPS 儲存策略）
+  - [schemas/analysis_result.leafdefect.schema.json](../../schemas/analysis_result.leafdefect.schema.json)（`health_score_global` / `health_score_species`）
+  - [docs/api.md](../api.md)（`gps_precision` 回應欄位、`/reports` `format` 參數）
+- 後續若需翻案 → 開新 ADR `superseded by NNNN`，不直接修改本檔。

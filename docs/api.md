@@ -37,6 +37,18 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
+### 五、GPS 隱私與 `gps_precision`
+
+依 [ADR-0001 議題 5](decisions/0001-open-questions.md)，所有回傳 GPS 座標的端點（影像、樹木、場域）**必須**附帶 `gps_precision` 欄位，由 API serialization middleware 依呼叫者角色動態裁切：
+
+| 角色 | `gps_precision` | 經緯度精度 |
+|------|----------------|-----------|
+| `admin` | `exact` | 原始值（小數點後 6 位以上） |
+| `researcher`（已驗證） | `town` | 鄉鎮級（截至約 ±0.01°） |
+| `viewer` / 公開 | `county` | 縣市級（截至約 ±0.1°，或回傳 `null` + `region` 文字） |
+
+DB 中**永遠儲存原始 GPS**，遮蔽僅發生在 serialization 階段。前端依 `gps_precision` 決定地圖顯示樣式。
+
 ### 三、HTTP 狀態碼
 
 | 範圍 | 用途 |
@@ -160,6 +172,8 @@ GET /resource?page=1&page_size=20&sort=-created_at
 }
 ```
 
+> `LeafDefect` 模型的 `metrics` 改回傳：`health_score_global_mean`（v1 必填）、`health_score_species_mean`（v1 為 `null`，v1.5+ 樹種校正後填入）、`health_grade`、各類 `*_ratio_mean`。詳見 [ADR-0001 議題 3](decisions/0001-open-questions.md) 與 [LeafDefect schema](../schemas/analysis_result.leafdefect.schema.json)。
+
 ---
 
 ## 肆、樹木（Tree）
@@ -172,7 +186,11 @@ GET /resource?page=1&page_size=20&sort=-created_at
     "tree_id": "T0123",
     "site_id": "NTU01",
     "species_zh": "台灣杉",
-    "lat": null, "lon": null,    // 已遮罩
+    "species_sci": null,
+    "lat": 24.5,
+    "lon": 121.3,
+    "gps_precision": "town",
+    "region": "南投縣信義鄉",
     "dbh_cm": 32.5,
     "height_m": 18.2,
     "crown_status": "stressed",
@@ -181,6 +199,8 @@ GET /resource?page=1&page_size=20&sort=-created_at
   }
 }
 ```
+
+> `lat` / `lon` 與 `gps_precision` 依呼叫者角色由 middleware 動態裁切，見「壹-五 GPS 隱私」。`viewer` 角色可能僅回傳 `region` 文字而 `lat`/`lon` 為 `null`。
 
 ### GET `/trees/{tree_id}/timeline?metric=health_score_mean`
 
@@ -237,15 +257,31 @@ GET /resource?page=1&page_size=20&sort=-created_at
   "tree_id": "T0123",
   "date_from": "2026-01-01",
   "date_to": "2026-04-29",
-  "format": "pdf"
+  "format": "all"
 }
 ```
+
+**Body 欄位**：
+
+| 欄位 | 型別 | 必填 | 預設 | 說明 |
+|------|------|------|------|------|
+| `type` | enum | ✓ | — | `image` / `tree` / `site` |
+| `tree_id` / `site_id` / `image_id` | string | △ | — | 依 `type` 擇一必填 |
+| `date_from` / `date_to` | ISO date | ○ | 全期 | |
+| `format` | enum | ○ | `all` | `pdf` / `csv` / `xlsx` / `all`；依 [ADR-0001 議題 4](decisions/0001-open-questions.md) PDF 與可編輯資料表並行輸出 |
 
 **Response 202**：
 
 ```json
-{ "data": { "report_id": "rpt_...", "status_url": "/reports/rpt_..." } }
+{
+  "data": {
+    "report_id": "rpt_01HXX...",
+    "status_url": "/reports/rpt_01HXX..."
+  }
+}
 ```
+
+當 `format = "all"` 時，產出物包含 `pdf` + `csv` + `xlsx`；查詢 `GET /reports/{report_id}` 會回傳每種格式的下載簽名 URL。
 
 ### GET `/reports/{report_id}`
 
