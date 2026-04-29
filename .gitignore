@@ -56,6 +56,8 @@ logs/*
 metadata/*.csv
 metadata/*.parquet
 metadata/*.xlsx
+# 例外：欄位範本檔可入 git（檔名格式 *.template.csv）
+!metadata/*.template.csv
 
 # ---- 個別大檔（已存在於 H: 的測試資料；遷移後不應出現） ----
 test.xlsx

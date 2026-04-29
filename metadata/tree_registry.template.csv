@@ -1,0 +1,4 @@
+tree_id,site_id,species_zh,species_sci,lat,lon,dbh_cm,height_m,crown_status,planted_year,is_protected,note
+T0001,NTU01,台灣杉,Taiwania cryptomerioides,24.5234,121.3456,32.5,18.2,healthy,2010,false,試拍 #1
+T0002,NTU01,台灣杉,Taiwania cryptomerioides,24.5236,121.3458,28.3,16.5,stressed,2010,false,西側冠層黃化
+T0003,NTU01,紅檜,Chamaecyparis formosensis,24.5240,121.3460,55.2,22.8,healthy,,true,母樹

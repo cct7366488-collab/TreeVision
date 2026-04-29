@@ -1,0 +1,7 @@
+image_id,tree_id,site_id,capture_type,capture_datetime,view,device_id,session_id,gps_lat,gps_lon,scale_object_type,scale_object_size_mm,has_color_card,weather,annotator,note
+img_PILOT_001,T0001,NTU01,canopy,2026-05-15T10:32:00+08:00,north,iphone15pro_user01,NTU01_20260515_1000,24.5234,121.3456,,,false,sunny,user01,試拍第一張樹冠北向
+img_PILOT_002,T0001,NTU01,canopy,2026-05-15T10:34:12+08:00,south,iphone15pro_user01,NTU01_20260515_1000,24.5234,121.3456,,,false,sunny,user01,
+img_PILOT_003,T0001,NTU01,canopy,2026-05-15T10:35:48+08:00,east,iphone15pro_user01,NTU01_20260515_1000,24.5234,121.3456,,,false,sunny,user01,
+img_PILOT_004,T0001,NTU01,canopy,2026-05-15T10:37:25+08:00,west,iphone15pro_user01,NTU01_20260515_1000,24.5234,121.3456,,,false,sunny,user01,
+img_PILOT_005,T0001,NTU01,leaf_closeup,2026-05-15T10:42:10+08:00,handheld,iphone15pro_user01,NTU01_20260515_1000,24.5234,121.3456,a4_grid,297.0,true,sunny,user01,健康樣本
+img_PILOT_006,T0001,NTU01,leaf_closeup,2026-05-15T10:43:30+08:00,handheld,iphone15pro_user01,NTU01_20260515_1000,24.5234,121.3456,a4_grid,297.0,true,sunny,user01,黃化樣本
