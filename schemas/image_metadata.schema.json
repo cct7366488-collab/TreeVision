@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/image_metadata.schema.json",
+  "title": "TreeVision Image Metadata",
+  "description": "影像上傳時必須附帶的 metadata 結構。",
+  "type": "object",
+  "required": [
+    "tree_id",
+    "site_id",
+    "capture_type",
+    "capture_datetime",
+    "view",
+    "device_id"
+  ],
+  "properties": {
+    "tree_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{1,16}$",
+      "description": "場域內唯一樹木編號"
+    },
+    "site_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{1,16}$"
+    },
+    "capture_type": {
+      "type": "string",
+      "enum": ["canopy", "leaf_closeup"]
+    },
+    "capture_datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "view": {
+      "type": "string",
+      "enum": ["north", "south", "east", "west", "overhead", "handheld"]
+    },
+    "device_id": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "gps_lat": {
+      "type": ["number", "null"],
+      "minimum": -90,
+      "maximum": 90
+    },
+    "gps_lon": {
+      "type": ["number", "null"],
+      "minimum": -180,
+      "maximum": 180
+    },
+    "scale_object_type": {
+      "type": ["string", "null"],
+      "enum": ["a4_grid", "coin_5twd", "coin_10twd", "ruler", "other", null]
+    },
+    "scale_object_size_mm": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0
+    },
+    "has_color_card": {
+      "type": ["boolean", "null"]
+    },
+    "weather": {
+      "type": ["string", "null"],
+      "enum": ["sunny", "cloudy", "overcast", "rain", "fog", null]
+    },
+    "note": {
+      "type": ["string", "null"],
+      "maxLength": 1000
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "capture_type": { "const": "leaf_closeup" } }
+      },
+      "then": {
+        "required": ["scale_object_type", "scale_object_size_mm"]
+      }
+    }
+  ],
+  "additionalProperties": false
+}

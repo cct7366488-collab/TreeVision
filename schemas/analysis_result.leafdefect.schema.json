@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/analysis_result.leafdefect.schema.json",
+  "title": "LeafDefect Analysis Result",
+  "type": "object",
+  "required": ["image_id", "model_id", "model_version", "per_leaf"],
+  "properties": {
+    "image_id": {"type": "string", "format": "uuid"},
+    "model_id": {"type": "string", "const": "LeafDefect"},
+    "model_version": {"type": "string"},
+    "per_leaf": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["instance_id", "lesion_ratio", "chlorosis_ratio", "necrosis_ratio", "hole_ratio", "health_score", "health_grade"],
+        "properties": {
+          "instance_id": {"type": "integer"},
+          "lesion_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+          "chlorosis_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+          "necrosis_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+          "hole_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+          "total_defect_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+          "health_score": {"type": "number", "minimum": 0, "maximum": 100},
+          "health_grade": {"type": "string", "enum": ["A", "B", "C", "D", "E"]}
+        }
+      }
+    },
+    "image_summary": {
+      "type": "object",
+      "properties": {
+        "lesion_ratio_mean": {"type": "number"},
+        "chlorosis_ratio_mean": {"type": "number"},
+        "necrosis_ratio_mean": {"type": "number"},
+        "hole_ratio_mean": {"type": "number"},
+        "total_defect_ratio_mean": {"type": "number"},
+        "health_score_mean": {"type": "number"},
+        "health_grade": {"type": "string", "enum": ["A", "B", "C", "D", "E"]}
+      }
+    }
+  }
+}

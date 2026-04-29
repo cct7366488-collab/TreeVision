@@ -1,0 +1,126 @@
+# ============================================================
+# TreeVision .gitignore
+# 公開 GitHub repo 不應包含的內容：影像原始資料、訓練後模型、
+# 個人金鑰、機器產生的中介檔。
+# ============================================================
+
+# ---- 影像資料（拍攝後不上傳，太大且可能含敏感場域資訊） ----
+raw/**
+!raw/**/README.md
+!raw/**/.gitkeep
+
+processed/**
+!processed/**/README.md
+!processed/**/.gitkeep
+
+canopy/masks/**
+canopy/overlays/**
+!canopy/**/README.md
+!canopy/**/.gitkeep
+
+leaf_closeup/masks/**
+leaf_closeup/overlays/**
+!leaf_closeup/**/README.md
+!leaf_closeup/**/.gitkeep
+
+# ---- 標註檔（依資料治理政策決定是否公開；先排除） ----
+annotations/**/*.json
+annotations/**/*.coco.json
+annotations/**/*.xml
+!annotations/**/README.md
+!annotations/**/.gitkeep
+
+# ---- 訓練模型權重 ----
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
+models/**/*.pkl
+models/**/*.h5
+models/**/*.safetensors
+models/**/checkpoints/
+!models/**/README.md
+!models/**/.gitkeep
+
+# ---- 推論輸出 / 報告產物 ----
+outputs/**/*.csv
+outputs/**/*.parquet
+outputs/**/*.json
+outputs/**/*.png
+outputs/**/*.jpg
+!outputs/**/README.md
+!outputs/**/.gitkeep
+
+reports/**/*.pdf
+reports/**/*.xlsx
+reports/**/*.docx
+!reports/**/README.md
+!reports/**/.gitkeep
+
+# ---- Log ----
+logs/**
+!logs/.gitkeep
+!logs/README.md
+
+# ---- 個別大檔（已存在的測試資料） ----
+test.xlsx
+result.xlsx
+*.pdf
+plots/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---- Node ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+.nuxt/
+.turbo/
+dist/
+
+# ---- IDE / OS ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ---- 機密 / 金鑰 ----
+*.pem
+*.key
+secrets/
+credentials.json
+service-account*.json
+
+# ---- Google Drive 同步衝突檔 ----
+*conflict*
+*.gdoc
+*.gsheet
+*.gslides
