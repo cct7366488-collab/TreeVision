@@ -1,71 +1,65 @@
 # ============================================================
 # TreeVision .gitignore
-# 公開 GitHub repo 不應包含的內容：影像原始資料、訓練後模型、
-# 個人金鑰、機器產生的中介檔。
+# 公開 GitHub repo 不應包含的內容：影像、模型權重、推論輸出、
+# 機密金鑰、機器產生的中介檔。
+# 策略：以「檔案類型」排除，讓資料夾結構（README、.gitkeep）
+#       可正常追蹤。
 # ============================================================
 
-# ---- 影像資料（拍攝後不上傳，太大且可能含敏感場域資訊） ----
-raw/**
-!raw/**/README.md
-!raw/**/.gitkeep
+# ---- 影像檔案（任何位置） ----
+**/*.jpg
+**/*.jpeg
+**/*.png
+**/*.tif
+**/*.tiff
+**/*.heic
+**/*.bmp
+**/*.gif
+**/*.webp
+**/*.raw
+**/*.dng
+**/*.arw
 
-processed/**
-!processed/**/README.md
-!processed/**/.gitkeep
-
-canopy/masks/**
-canopy/overlays/**
-!canopy/**/README.md
-!canopy/**/.gitkeep
-
-leaf_closeup/masks/**
-leaf_closeup/overlays/**
-!leaf_closeup/**/README.md
-!leaf_closeup/**/.gitkeep
-
-# ---- 標註檔（依資料治理政策決定是否公開；先排除） ----
-annotations/**/*.json
-annotations/**/*.coco.json
-annotations/**/*.xml
-!annotations/**/README.md
-!annotations/**/.gitkeep
-
-# ---- 訓練模型權重 ----
-models/**/*.pt
-models/**/*.pth
-models/**/*.onnx
-models/**/*.pkl
-models/**/*.h5
-models/**/*.safetensors
+# ---- 模型權重 ----
+**/*.pt
+**/*.pth
+**/*.onnx
+**/*.pkl
+**/*.h5
+**/*.safetensors
 models/**/checkpoints/
-!models/**/README.md
-!models/**/.gitkeep
 
-# ---- 推論輸出 / 報告產物 ----
+# ---- 推論結果（資料表，太大） ----
 outputs/**/*.csv
 outputs/**/*.parquet
 outputs/**/*.json
-outputs/**/*.png
-outputs/**/*.jpg
-!outputs/**/README.md
-!outputs/**/.gitkeep
+!schemas/**/*.json
 
+# ---- 標註檔（資料治理優先；之後可開白名單） ----
+annotations/**/*.json
+annotations/**/*.coco.json
+annotations/**/*.xml
+annotations/**/*.txt
+
+# ---- 報表產物 ----
 reports/**/*.pdf
 reports/**/*.xlsx
 reports/**/*.docx
-!reports/**/README.md
-!reports/**/.gitkeep
+reports/**/*.csv
 
-# ---- Log ----
-logs/**
+# ---- Logs ----
+logs/*
 !logs/.gitkeep
 !logs/README.md
 
-# ---- 個別大檔（已存在的測試資料） ----
+# ---- Metadata 主檔（內含實際樹木 / 場域資料，不公開） ----
+metadata/*.csv
+metadata/*.parquet
+metadata/*.xlsx
+
+# ---- 個別大檔（已存在於 H: 的測試資料；遷移後不應出現） ----
 test.xlsx
 result.xlsx
-*.pdf
-plots/
 
 # ---- Python ----
 __pycache__/
@@ -119,7 +113,7 @@ secrets/
 credentials.json
 service-account*.json
 
-# ---- Google Drive 同步衝突檔 ----
+# ---- Google Drive 同步衝突檔（保險用，本 repo 已搬離 Drive） ----
 *conflict*
 *.gdoc
 *.gsheet
