@@ -27,6 +27,7 @@ TreeVision 是一個結合樹冠影像、葉片近拍、AI 分割模型與健康
 | [docs/api.md](docs/api.md) | REST API 介面定義 |
 | [docs/roadmap.md](docs/roadmap.md) | 開發里程碑與模型訓練計畫 |
 | [schemas/](schemas/) | JSON Schema 檔（image_metadata、analysis_result 等） |
+| [references/](references/) | 外部參考資料彙整（場域官方文件、試驗設計、現場 SOP） |
 
 ---
 
