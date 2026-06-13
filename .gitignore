@@ -108,6 +108,9 @@ desktop.ini
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
+# ---- 暫存萃取檔（references/ 來源檔的中間萃取結果） ----
+.scratch/
+
 # ---- 機密 / 金鑰 ----
 *.pem
 *.key
