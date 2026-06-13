@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/phenology.schema.json",
+  "title": "TreeVision Phenology（物候）",
+  "description": "物候觀測。對齊既有 XLSX『物候』工作表。記錄個體之物候分期與開花/結實量。",
+  "type": "object",
+  "required": ["survey_date", "site_id", "phenology_stage"],
+  "properties": {
+    "survey_date": {"type": "string", "format": "date", "description": "調查日期"},
+    "site_id": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}$",
+      "description": "所屬場域 FK"
+    },
+    "tree_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{3,6}-(C0|P1|F150|P1F150)-[0-9]{3}$",
+      "description": "樣木 FK（選填；可為樣區層級觀測）"
+    },
+    "phenology_stage": {
+      "type": "string",
+      "enum": ["嫩葉", "新梢", "花蕾", "開花", "幼果", "成熟果", "落葉", "休眠"],
+      "description": "物候分期（XLSX 代碼表）"
+    },
+    "flowering_amount": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "開花量"
+    },
+    "fruiting_amount": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "結實量"
+    },
+    "note": {"type": ["string", "null"], "maxLength": 1000}
+  },
+  "additionalProperties": false
+}

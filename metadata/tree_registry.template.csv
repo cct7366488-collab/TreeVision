@@ -1,4 +1,5 @@
-tree_id,site_id,species_zh,species_sci,lat,lon,dbh_cm,height_m,crown_status,planted_year,is_protected,note
-T0001,NTU01,台灣杉,Taiwania cryptomerioides,24.5234,121.3456,32.5,18.2,healthy,2010,false,試拍 #1
-T0002,NTU01,台灣杉,Taiwania cryptomerioides,24.5236,121.3458,28.3,16.5,stressed,2010,false,西側冠層黃化
-T0003,NTU01,紅檜,Chamaecyparis formosensis,24.5240,121.3460,55.2,22.8,healthy,,true,母樹
+tree_id,site_id,plot_id,treatment_id,tree_no,tree_tag,is_multistem,stem_count,species_zh,species_sci,growth_stage,status,planted_date,lat,lon,x_m,y_m,is_protected,note
+115121-C0-001,115-12-1,115-12-1.C0,C0,1,001,true,7,土肉桂,Cinnamomum osmophloeum,成樹,存活,2010-10,,,2.5,-1,false,多幹個體(7莖);GPS留空不公開精確位置
+115121-P1-001,115-12-1,115-12-1.P1,P1,1,,false,1,土肉桂,Cinnamomum osmophloeum,成樹,存活,2010-10,,,,,false,修剪處理
+811-C0-001,8-1-1,8-1-1.C0,C0,1,,false,1,土肉桂,Cinnamomum osmophloeum,幼樹,存活,2024-03,,,,,false,
+811-P1F150-001,8-1-1,8-1-1.P1F150,P1F150,1,,false,1,土肉桂,Cinnamomum osmophloeum,幼樹,存活,2024-03,,,,,false,修剪+施肥150g

@@ -2,10 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://treevision.example.com/schemas/analysis_result.leafinst.schema.json",
   "title": "LeafInst Analysis Result",
+  "description": "LeafInst 推論結果（schema v0.2）。",
   "type": "object",
   "required": ["image_id", "model_id", "model_version", "leaves", "scale_objects", "mm_per_pixel"],
   "properties": {
     "image_id": {"type": "string", "format": "uuid"},
+    "schema_version": {"type": "string", "const": "0.2"},
     "model_id": {"type": "string", "const": "LeafInst"},
     "model_version": {"type": "string"},
     "mm_per_pixel": {"type": "number", "exclusiveMinimum": 0},

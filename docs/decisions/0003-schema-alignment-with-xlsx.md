@@ -224,6 +224,8 @@ XLSX 代碼表的 enum 為標準。TreeVision 既有 enum 需調整：
 
 ### 二、JSON Schema 異動（`schemas/`）
 
+> ✅ **2026-06-13 完成**：全 18 個 schema 已建/改，`jsonschema` Draft 2020-12 驗證通過，並以「土肉桂試驗_長格式」真實資料 round-trip（486 株/1,826 量測/4 處理組）驗證。tree_id 採既有碼、image_metadata 加 image_id 選填欄。
+
 需新增 / 修改：
 
 | 檔案 | 動作 |
@@ -248,6 +250,8 @@ XLSX 代碼表的 enum 為標準。TreeVision 既有 enum 需調整：
 | `analysis_result.leafdefect.schema.json` | 修：v0.2 元欄位 |
 
 ### 三、metadata 模板（`metadata/`）
+
+> ✅ **2026-06-13 完成**：13 個 CSV 模板（3 改 + 10 新）已建，範例採大雪山土肉桂試驗值，45 列全數對 schema 驗證通過；`metadata/README.md` 已重寫。
 
 | 檔案 | 動作 |
 |------|------|

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/regeneration_subplot.schema.json",
+  "title": "TreeVision Regeneration Subplot（再生小樣區）",
+  "description": "再生/更新調查。對齊既有 XLSX『再生』工作表。記錄各高度級距之幼苗/幼樹株數。",
+  "type": "object",
+  "required": ["subplot_id", "site_id", "species_zh", "height_class", "count"],
+  "properties": {
+    "subplot_id": {
+      "type": "string",
+      "description": "再生小樣區代碼，例 Q001"
+    },
+    "site_id": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}$",
+      "description": "所屬場域 FK"
+    },
+    "subplot_area_m2": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0,
+      "description": "小樣區面積（m²）"
+    },
+    "species_zh": {"type": "string", "description": "樹種中文名"},
+    "species_sci": {"type": ["string", "null"], "description": "學名"},
+    "height_class": {
+      "type": "string",
+      "description": "幼樹高度級距，例 30-100 cm"
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "該高度級距之幼苗/幼樹株數"
+    },
+    "survey_date": {"type": ["string", "null"], "format": "date"},
+    "surveyor": {"type": ["string", "null"], "description": "調查者"},
+    "note": {"type": ["string", "null"], "maxLength": 1000}
+  },
+  "additionalProperties": false
+}

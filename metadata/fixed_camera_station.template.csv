@@ -1,0 +1,6 @@
+station_id,tree_id,station_label,azimuth_deg,distance_to_trunk_m,camera_height_m,pitch_deg,status,created_at,created_by,note
+115121-C0-001.north_side,115121-C0-001,north_side,0,6.0,1.5,0,active,2026-03-15,op01,成熟林5-7m廣角樹冠為主
+115121-C0-001.east_side,115121-C0-001,east_side,90,6.0,1.5,0,active,2026-03-15,op01,
+115121-C0-001.leaf_macro,115121-C0-001,leaf_macro,,0.4,,90,active,2026-03-15,op01,葉片近拍A4背景
+811-P1F150-001.north_side,811-P1F150-001,north_side,0,2.5,1.5,0,active,2025-12-20,op02,幼齡林標準2.5m攝距
+811-P1F150-001.top_view,811-P1F150-001,top_view,,2.0,2.0,-90,active,2025-12-20,op02,加值;伸縮桿俯拍冠幅

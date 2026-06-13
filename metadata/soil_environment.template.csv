@@ -1,0 +1,3 @@
+survey_date,site_id,soil_temp_c,soil_moisture_pct,ph,conductivity,texture,bulk_density_g_cm3,litter_depth_cm,ground_cover_type,photo,note
+2025-08-26,115-12-1,18.4,21.9,5.8,0.12,Sandy loam,0.98,2.5,枯落物,,試驗前基準
+2026-03-31,115-12-1,,,5.9,0.14,Sandy loam,,2.8,枯落物,,施肥後

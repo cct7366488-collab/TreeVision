@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/treatment_response_summary.schema.json",
+  "title": "TreeVision Treatment Response Summary（處理組響應彙總）",
+  "description": "每處理組（plot）× 每場次（season）的 14 響應指標 + health_score 彙總，供 ANOVA。見 ADR-0004 §五。並含人工量測對照欄（dbh/height/volume）以驗影像 vs 人工相關性（r≥0.7）。",
+  "type": "object",
+  "required": ["site_id", "treatment_id", "season"],
+  "properties": {
+    "summary_id": {
+      "type": ["string", "null"],
+      "description": "彙總鍵，建議 <plot_id>_<season>，例 115-12-1.C0_114Q3"
+    },
+    "site_id": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}$"
+    },
+    "plot_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}\\.(C0|P1|F150|P1F150)$"
+    },
+    "treatment_id": {
+      "type": "string",
+      "enum": ["C0", "P1", "F150", "P1F150"]
+    },
+    "campaign_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}_[0-9]{3}Q[1-4]$"
+    },
+    "season": {
+      "type": "string",
+      "pattern": "^[0-9]{3}Q[1-4]$"
+    },
+    "n_trees": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "本彙總納入之有效樣樹數"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "14 核心指標 + health_score，每項為 {mean, sd}（ADR-0004）",
+      "properties": {
+        "leaf_count_visible": {"$ref": "#/$defs/stat"},
+        "new_leaf_count": {"$ref": "#/$defs/stat"},
+        "new_leaf_ratio": {"$ref": "#/$defs/stat"},
+        "mean_leaf_area_cm2": {"$ref": "#/$defs/stat"},
+        "total_leaf_area_estimate_cm2": {"$ref": "#/$defs/stat"},
+        "green_index_mean": {"$ref": "#/$defs/stat"},
+        "chlorophyll_proxy_tgi": {"$ref": "#/$defs/stat"},
+        "yellowing_ratio": {"$ref": "#/$defs/stat"},
+        "disease_lesion_ratio": {"$ref": "#/$defs/stat"},
+        "pest_damage_ratio": {"$ref": "#/$defs/stat"},
+        "plant_height_cm": {"$ref": "#/$defs/stat"},
+        "crown_projected_area_cm2": {"$ref": "#/$defs/stat"},
+        "crown_height_ratio": {"$ref": "#/$defs/stat"},
+        "branch_count": {"$ref": "#/$defs/stat"},
+        "health_score": {"$ref": "#/$defs/stat"}
+      },
+      "additionalProperties": false
+    },
+    "manual_reference": {
+      "type": ["object", "null"],
+      "description": "人工量測對照（驗影像相關性）",
+      "properties": {
+        "dbh_cm": {"$ref": "#/$defs/stat"},
+        "height_m": {"$ref": "#/$defs/stat"},
+        "volume_m3": {"$ref": "#/$defs/stat"}
+      },
+      "additionalProperties": false
+    },
+    "note": {"type": ["string", "null"], "maxLength": 1000}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stat": {
+      "type": "object",
+      "properties": {
+        "mean": {"type": ["number", "null"]},
+        "sd": {"type": ["number", "null"]},
+        "n": {"type": ["integer", "null"], "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  }
+}

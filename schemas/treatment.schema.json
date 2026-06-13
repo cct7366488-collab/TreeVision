@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/treatment.schema.json",
+  "title": "TreeVision Treatment（處理組定義）",
+  "description": "試驗處理組定義。對齊大雪山土肉桂試驗實施之全場 2×2 設計（修剪± × 施肥150g±），見 ADR-0003 / ADR-0004。施肥僅 150g 一階（二元對照），報告書 200/250g 三水平未實施。",
+  "type": "object",
+  "required": ["treatment_id", "label_zh", "pruning", "fertilizer_g"],
+  "properties": {
+    "treatment_id": {
+      "type": "string",
+      "enum": ["C0", "P1", "F150", "P1F150"],
+      "description": "處理代碼。C0=對照(不修剪不施肥)、P1=修剪、F150=施肥150g、P1F150=修剪+施肥150g"
+    },
+    "label_zh": {
+      "type": "string",
+      "enum": ["對照", "修剪矮化", "施肥150g", "修剪+施肥150g"],
+      "description": "處理中文名（對齊長格式『處理中文』欄）"
+    },
+    "pruning": {
+      "type": "integer",
+      "enum": [0, 1],
+      "description": "是否修剪（0=否、1=是）"
+    },
+    "fertilizer_g": {
+      "type": "integer",
+      "enum": [0, 150],
+      "description": "每株每次施肥量（克）。有機肥+矽肥 10:1 混合；目前僅 150g 一階"
+    },
+    "note": {
+      "type": ["string", "null"],
+      "maxLength": 1000
+    }
+  },
+  "additionalProperties": false
+}

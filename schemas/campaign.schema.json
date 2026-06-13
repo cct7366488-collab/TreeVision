@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/campaign.schema.json",
+  "title": "TreeVision Campaign（採集場次）",
+  "description": "一次出場拍攝/調查活動。依 ADR-0005 決議採『按樣區分批、同一樣區當日完成』，故 campaign 為每樣區每季別一筆。季別對齊長格式『季別』欄（民國年+季）。",
+  "type": "object",
+  "required": ["campaign_id", "site_id", "season"],
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}_[0-9]{3}Q[1-4]$",
+      "description": "場次鍵，格式 <site_id>_<season>，例 8-1-1_114Q3"
+    },
+    "site_id": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}$",
+      "description": "本場次涵蓋之場域 FK"
+    },
+    "season": {
+      "type": "string",
+      "pattern": "^[0-9]{3}Q[1-4]$",
+      "description": "季別（民國年+季），例 114Q3、115Q1"
+    },
+    "capture_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "實際出場拍攝日期（同樣區當日完成）"
+    },
+    "date_estimated": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "推定季末日（對齊長格式『量測日期_推定』，如 114Q3→2025-09-30）"
+    },
+    "operator": {
+      "type": ["string", "null"],
+      "description": "拍攝執行者（合作社兼任，見 ADR-0005）"
+    },
+    "note": {
+      "type": ["string", "null"],
+      "maxLength": 1000
+    }
+  },
+  "additionalProperties": false
+}

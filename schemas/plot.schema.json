@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/plot.schema.json",
+  "title": "TreeVision Plot（試驗單元）",
+  "description": "試驗單元＝site × treatment 的交集（CRBD 中的處理格）。每 plot 約 30 株。見 ADR-0003 §三。面積目前不設子樣區（site 面積＝作業列區總面積）。",
+  "type": "object",
+  "required": ["plot_id", "site_id", "treatment_id"],
+  "properties": {
+    "plot_id": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}\\.(C0|P1|F150|P1F150)$",
+      "description": "試驗單元鍵，格式 <site_id>.<treatment_id>，例 115-12-1.C0"
+    },
+    "site_id": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}$",
+      "description": "所屬場域 FK"
+    },
+    "treatment_id": {
+      "type": "string",
+      "enum": ["C0", "P1", "F150", "P1F150"],
+      "description": "處理組 FK"
+    },
+    "tree_count": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "本 plot 樣樹株數（約 30）"
+    },
+    "plot_area_m2": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0,
+      "description": "若另設監測子樣區之面積；現階段為 null（不設）"
+    },
+    "note": {
+      "type": ["string", "null"],
+      "maxLength": 1000
+    }
+  },
+  "additionalProperties": false
+}

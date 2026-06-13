@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/experiment_anova_result.schema.json",
+  "title": "TreeVision Experiment ANOVA Result（變異數分析結果）",
+  "description": "對單一響應指標的雙因子（修剪 × 施肥）ANOVA 結果。見 ADR-0004 §四報表與 ADR-0003 試驗對照分析層。施肥為二元（150g vs 0），故各因子為 2 水準的 2×2 析因。",
+  "type": "object",
+  "required": ["metric", "factor", "f_value", "p_value"],
+  "properties": {
+    "experiment_id": {
+      "type": ["string", "null"],
+      "description": "分析批次識別，例 daxueshan_cinnamon_115Q1"
+    },
+    "site_scope": {
+      "type": ["string", "null"],
+      "description": "分析範圍（單一 site_id、或 all / juvenile / mature 等彙總群）"
+    },
+    "season": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{3}Q[1-4]$"
+    },
+    "metric": {
+      "type": "string",
+      "description": "受測響應指標名，如 leaf_count_visible、plant_height_cm、health_score"
+    },
+    "factor": {
+      "type": "string",
+      "enum": ["pruning", "fertilizer", "pruning_x_fertilizer"],
+      "description": "效應因子：修剪 / 施肥 / 修剪×施肥交互"
+    },
+    "df_between": {"type": ["integer", "null"], "minimum": 0, "description": "組間自由度"},
+    "df_within": {"type": ["integer", "null"], "minimum": 0, "description": "組內自由度"},
+    "f_value": {"type": "number", "minimum": 0, "description": "F 統計量"},
+    "p_value": {"type": "number", "minimum": 0, "maximum": 1, "description": "顯著性 p 值"},
+    "effect_size": {
+      "type": ["number", "null"],
+      "description": "效果量（partial η²）"
+    },
+    "effect_size_type": {
+      "type": ["string", "null"],
+      "enum": ["partial_eta_sq", "eta_sq", "omega_sq", null],
+      "description": "效果量類型"
+    },
+    "significant": {
+      "type": ["boolean", "null"],
+      "description": "是否達 α=0.05 顯著"
+    },
+    "alpha": {"type": ["number", "null"], "description": "顯著水準，預設 0.05"},
+    "posthoc": {
+      "type": ["array", "null"],
+      "description": "多重比較（LSD/Tukey）結果",
+      "items": {
+        "type": "object",
+        "properties": {
+          "group_a": {"type": "string"},
+          "group_b": {"type": "string"},
+          "mean_diff": {"type": ["number", "null"]},
+          "p_value": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "method": {"type": ["string", "null"], "enum": ["LSD", "Tukey", "Bonferroni", null]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "note": {"type": ["string", "null"], "maxLength": 1000}
+  },
+  "additionalProperties": false
+}

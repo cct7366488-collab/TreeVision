@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/sample.schema.json",
+  "title": "TreeVision Sample（樣品）",
+  "description": "採集樣品（葉/枝等組織）。對齊既有 XLSX『樣品』工作表。供精油萃取、化學成分或含水率分析。",
+  "type": "object",
+  "required": ["sample_id", "site_id", "tissue_type"],
+  "properties": {
+    "sample_id": {
+      "type": "string",
+      "description": "樣品代碼，例 S001"
+    },
+    "site_id": {
+      "type": "string",
+      "pattern": "^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}$",
+      "description": "所屬場域 FK"
+    },
+    "tree_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{3,6}-(C0|P1|F150|P1F150)-[0-9]{3}$",
+      "description": "樣木 FK（選填；亦可為處理組混合樣）"
+    },
+    "tissue_type": {
+      "type": "string",
+      "enum": ["葉", "枝", "根", "樹皮", "果實", "其他"],
+      "description": "組織類型"
+    },
+    "purpose": {
+      "type": ["string", "null"],
+      "description": "檢測目的，如 化學成分、精油產率、含水率"
+    },
+    "fresh_weight_g": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "鮮重（g）"
+    },
+    "dry_weight_g": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "乾重（g）"
+    },
+    "preservation": {
+      "type": ["string", "null"],
+      "description": "保存方式，如 -20°C 冷凍"
+    },
+    "note": {"type": ["string", "null"], "maxLength": 1000}
+  },
+  "additionalProperties": false
+}

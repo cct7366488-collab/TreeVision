@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://treevision.example.com/schemas/analysis_result.canopyseg.schema.json",
   "title": "CanopySeg Analysis Result",
+  "description": "CanopySeg 推論結果（schema v0.2）。",
   "type": "object",
   "required": [
     "image_id",
@@ -11,6 +12,7 @@
   ],
   "properties": {
     "image_id": {"type": "string", "format": "uuid"},
+    "schema_version": {"type": "string", "const": "0.2"},
     "model_id": {"type": "string", "const": "CanopySeg"},
     "model_version": {"type": "string"},
     "mask_uri": {"type": "string", "format": "uri"},

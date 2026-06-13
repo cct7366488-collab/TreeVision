@@ -1,0 +1,3 @@
+sample_id,site_id,tree_id,tissue_type,purpose,fresh_weight_g,dry_weight_g,preservation,note
+S001,115-12-1,115121-C0-001,葉,化學成分,35.2,8.1,-20°C 冷凍,精油成分分析
+S002,115-12-1,,葉,精油產率,500.0,135.0,陰乾,處理組混合樣;蒸餾用

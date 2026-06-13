@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://treevision.example.com/schemas/fixed_camera_station.schema.json",
+  "title": "TreeVision Fixed Camera Station（固定攝點）",
+  "description": "每株樣木的固定攝點定義（試驗對照前提）。見 ADR-0005。核心攝點每株 ≥3（北側全株/東側全株/葉片近拍），加值攝點視可行性。成熟林（115-12-1）採 5–7m 廣角，distance_to_trunk_m 記實際攝距。",
+  "type": "object",
+  "required": ["station_id", "tree_id", "station_label"],
+  "properties": {
+    "station_id": {
+      "type": "string",
+      "pattern": "^[0-9]{3,6}-(C0|P1|F150|P1F150)-[0-9]{3}\\.(north_side|east_side|leaf_macro|top_view|south_side|west_side|pruning_site_close_up)$",
+      "description": "攝點鍵＝<tree_id>.<station_label>，例 115121-C0-001.north_side"
+    },
+    "tree_id": {
+      "type": "string",
+      "pattern": "^[0-9]{3,6}-(C0|P1|F150|P1F150)-[0-9]{3}$",
+      "description": "樣木 FK"
+    },
+    "station_label": {
+      "type": "string",
+      "enum": ["north_side", "east_side", "leaf_macro", "top_view", "south_side", "west_side", "pruning_site_close_up"],
+      "description": "攝點別。核心：north_side/east_side/leaf_macro；加值：top_view/south_side/west_side/pruning_site_close_up"
+    },
+    "azimuth_deg": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 360,
+      "description": "方位角（北=0）"
+    },
+    "distance_to_trunk_m": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0,
+      "description": "實測攝距（m）。幼齡林標準 2.5；成熟林 5–7"
+    },
+    "camera_height_m": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "相機鏡頭離地高（m）"
+    },
+    "pitch_deg": {
+      "type": ["number", "null"],
+      "minimum": -90,
+      "maximum": 90,
+      "description": "相機仰角（水平=0、俯拍=-90）"
+    },
+    "status": {
+      "type": ["string", "null"],
+      "enum": ["active", "restored", "abandoned", null],
+      "description": "攝點狀態。標樁遺失重建後標 restored"
+    },
+    "created_at": {"type": ["string", "null"], "format": "date"},
+    "created_by": {"type": ["string", "null"]},
+    "note": {"type": ["string", "null"], "maxLength": 1000}
+  },
+  "additionalProperties": false
+}

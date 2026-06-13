@@ -1,2 +1,5 @@
-site_id,name,owner,region,centroid_lat,centroid_lon,area_ha,forest_type,note
-NTU01,台大實驗林溪頭一號樣區,國立臺灣大學,南投縣,24.5234,121.3456,2.5,人工林,試拍場域
+site_id,site_code_short,plot_type,name,owner,region,township,location,forest_district,compartment,sub_lot_no,gps_datum,centroid_lat,centroid_lon,elevation_m,slope_deg,aspect,slope_position,area_ha,age_stage,age_class,planted_date,established_date,surveyor,forest_type,note
+115-12-1,115121,永久樣區,大安溪115林班假12號土肉桂試驗區,林業及自然保育署臺中分署,臺中市,和平區,大雪山,大安溪事業區,115,12,WGS84,24.26,120.93,320,25,SE,中坡,0.5,15-20年生成熟林,mature,2010-10,2025-08-26,調查員A,人工林,示意座標(縣市級);修剪×施肥綜合試驗
+117-28-1,117218,永久樣區,大安溪117林班假28號土肉桂幼齡林,林業及自然保育署臺中分署,臺中市,和平區,大雪山,大安溪事業區,117,28,WGS84,24.26,120.93,,,,,0.355,1-2年生幼齡林,juvenile,2025-04,,調查員A,人工林,示意座標
+8-1-1,811,永久樣區,八仙山20林班假1號土肉桂幼齡林,林業及自然保育署臺中分署,臺中市,和平區,八仙山,八仙山事業區,20,1,WGS84,24.22,120.97,,,,,0.2372,1-2年生幼齡林,juvenile,2024-03,,調查員A,人工林,示意座標
+8-1-10,8110,永久樣區,八仙山20林班假1號-10土肉桂幼齡林,林業及自然保育署臺中分署,臺中市,和平區,八仙山,八仙山事業區,20,1,WGS84,24.22,120.97,,,,,0.4482,1-2年生幼齡林,juvenile,2024-03,,調查員A,人工林,示意座標
