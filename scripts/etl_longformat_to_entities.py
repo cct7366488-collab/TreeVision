@@ -48,6 +48,16 @@ SITE_FACTS = {
 }
 OWNER, REGION, TOWNSHIP = "林業及自然保育署臺中分署", "臺中市", "和平區"
 
+# leading_blank_treeno 回收對照（依 樣區監測.xlsx 原表回溯分析）：
+# 鍵 = (樣區短碼, 處理代碼, 季別) → 補回之樣木編號。
+# 僅在「該區塊確缺某編號且 leading 列即該編號」時回收，避免臆造研究資料。
+#   - 115121/F150/115Q1：該區塊 1~30 缺 1 號，leading 多幹列即 1 號 → 補 1。
+# 其餘 leading_blank 不列入此表：8110 三區塊為空列（無量測）→ 自動丟棄；
+# 115121 之 P1、P1F150 115Q1 區塊 1~30 已滿、為帶資料之多餘列 → 隔離待原表確認。
+RECOVERY_MAP = {
+    ("115121", "F150", "115Q1"): 1,
+}
+
 
 def num(v):
     if v is None or v == "":
@@ -93,7 +103,9 @@ def transform(longformat_path):
 
     treatments, sites, plots, trees, campaigns = (OrderedDict() for _ in range(5))
     measurements = []
-    dq = []  # 資料品質旗標列
+    dq = []        # 隔離：帶資料但編號無法確定，待原表確認
+    recovered = []  # 已回收：依 RECOVERY_MAP 補回編號
+    dropped = []   # 丟棄：leading_blank 空列（無量測）
     tree_last = {}  # tree_id -> (season, status) 取最後
 
     for rn, r in enumerate(rows, start=2):
@@ -111,11 +123,25 @@ def transform(longformat_path):
         stem_m = re.search(r"-s([0-9]+)$", code)
         stem_seq = int(stem_m.group(1)) if stem_m else 1
 
-        # DQ：樣木編號為空/0（長格式 leading_blank_treeno）→ 無法入 registry，連量測一併隔離
+        # leading_blank_treeno 處理：回收 / 丟棄 / 隔離（見 RECOVERY_MAP 註解）
         if flag == "leading_blank_treeno" or not tree_no:
-            dq.append(dict(row=rn, code=code, season=season, issue="leading_blank_treeno(編號空白補0)",
-                           dbh=num(c(r, "直徑_cm")), height=num(c(r, "樹高_m"))))
-            continue
+            short = code.split("-")[0]
+            dbh_v, ht_v = num(c(r, "直徑_cm")), num(c(r, "樹高_m"))
+            rec_no = RECOVERY_MAP.get((short, treat, season))
+            if rec_no is not None:
+                tree_no = rec_no
+                base_tree = "%s-%s-%03d" % (short, treat, rec_no)
+                recovered.append(dict(row=rn, code=code, recovered_tree_id=base_tree,
+                                      stem_seq=stem_seq, dbh=dbh_v, height=ht_v))
+                # fall through：以補回之編號正常處理
+            elif dbh_v is None and ht_v is None:
+                dropped.append(dict(row=rn, code=code, season=season, issue="leading_blank 空列(無量測)→丟棄"))
+                continue
+            else:
+                dq.append(dict(row=rn, code=code, season=season,
+                               issue="leading_blank 且區塊1~30已滿、編號無法確定→隔離待原表確認",
+                               dbh=dbh_v, height=ht_v))
+                continue
 
         # treatment
         if treat not in treatments:
@@ -171,9 +197,10 @@ def transform(longformat_path):
         last = tree_last.get(tid)
         t["status"] = last[1] if last else None
 
-    return dict(treatment=list(treatments.values()), site_registry=list(sites.values()),
-                plot=list(plots.values()), tree_registry=list(trees.values()),
-                tree_measurement=measurements, campaign=list(campaigns.values())), dq
+    return (dict(treatment=list(treatments.values()), site_registry=list(sites.values()),
+                 plot=list(plots.values()), tree_registry=list(trees.values()),
+                 tree_measurement=measurements, campaign=list(campaigns.values())),
+            dq, recovered, dropped)
 
 
 def validate(entities, validators):
@@ -212,7 +239,7 @@ def main():
 
     os.makedirs(args.outdir, exist_ok=True)
     validators = load_validators()
-    entities, dq = transform(args.longformat)
+    entities, dq, recovered, dropped = transform(args.longformat)
     errors = validate(entities, validators)
 
     print("=== 實體記錄數 / schema 驗證 ===")
@@ -229,13 +256,16 @@ def main():
     report = dict(longformat=os.path.basename(args.longformat),
                   record_counts={k: len(v) for k, v in entities.items()},
                   schema_errors={k: len(v) for k, v in errors.items()},
-                  dq_flag_count=len(dq), dq_flags=dq)
+                  leading_blank=dict(recovered=len(recovered), dropped_empty=len(dropped),
+                                     quarantined=len(dq)),
+                  recovered=recovered, dropped=dropped, quarantined=dq)
     with open(os.path.join(args.outdir, "dq_report.json"), "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
 
-    print("\n=== 資料品質（DQ）===")
-    print("隔離旗標列數:", len(dq), "（多為 leading_blank_treeno；詳見 dq_report.json）")
-    print("輸出目錄:", args.outdir)
+    print("\n=== leading_blank_treeno 處置 ===")
+    print("回收(補回編號): {}　丟棄(空列): {}　隔離(待原表確認): {}".format(
+        len(recovered), len(dropped), len(dq)))
+    print("輸出目錄:", args.outdir, "（詳見 dq_report.json）")
     print("\nRESULT:", "ALL VALID" if total_err == 0 else "SCHEMA ERRORS={}".format(total_err))
     sys.exit(0 if total_err == 0 else 1)
 
