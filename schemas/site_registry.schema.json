@@ -4,7 +4,7 @@
   "title": "TreeVision Site Registry（場域）",
   "description": "場域層級實體（事業區+林班+作業列區）。對齊既有『土肉桂生長調查記錄表.xlsx』樣區工作表，並擴充 ADR-0002 之四樣區定錨資料。site_id 採林班作業列區 dash 編號（115-12-1 等），短碼為別名。",
   "type": "object",
-  "required": ["site_id", "name", "owner", "region", "gps_datum", "centroid_lat", "centroid_lon"],
+  "required": ["site_id", "name", "owner", "region", "gps_datum"],
   "properties": {
     "site_id": {
       "type": "string",
@@ -35,10 +35,10 @@
       "description": "座標基準（XLSX 代碼表）"
     },
     "centroid_lat": {
-      "type": "number",
-      "description": "場域中心緯度。DB 存原始值；遮蔽於 API serialization（ADR-0001 議題5）"
+      "type": ["number", "null"],
+      "description": "場域中心緯度（選填；由位置圖/現場 GPS 補入，非調查長表）。DB 存原始值；遮蔽於 API serialization（ADR-0001 議題5）"
     },
-    "centroid_lon": {"type": "number", "description": "場域中心經度"},
+    "centroid_lon": {"type": ["number", "null"], "description": "場域中心經度（選填）"},
     "elevation_m": {"type": ["number", "null"], "description": "海拔高（公尺）"},
     "slope_deg": {"type": ["number", "null"], "minimum": 0, "maximum": 90, "description": "坡度（度）"},
     "aspect": {

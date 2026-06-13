@@ -1,5 +1,14 @@
 # scripts/ — 輔助腳本
 
+## 已實作
+
+| 腳本 | 用途 |
+|------|------|
+| `_extract_refs.py` | 從 DOCX/XLSX/PPTX 萃取 `references/` 來源檔內容 |
+| `etl_longformat_to_entities.py` | 土肉桂試驗「長格式」XLSX → v0.2 六實體（treatment/site/plot/tree/tree_measurement/campaign），逐筆 schema 驗證 + DQ 報告。輸入以 `--longformat`／env `TREEVISION_LONGFORMAT` 指定（不硬編客戶路徑）；輸出至 `outputs/entities/`（gitignored，客戶資料衍生不上雲）|
+
+## 預期腳本（待實作）
+
 | 預期腳本 | 用途 |
 |----------|------|
 | `validate_metadata.py` | 檢查 `metadata/image_metadata.csv` 必填欄位、外鍵、命名規則 |

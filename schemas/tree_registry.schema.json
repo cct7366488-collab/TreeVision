@@ -56,8 +56,8 @@
     },
     "status": {
       "type": ["string", "null"],
-      "enum": ["存活", "枯立", "倒伏", "缺測", null],
-      "description": "個體狀態（XLSX 代碼表）。長格式『狀態』含『死亡』者對應 枯立/倒伏 視情況"
+      "enum": ["存活", "枯立", "倒伏", "缺測", "死亡", null],
+      "description": "個體狀態。XLSX 代碼表為 存活/枯立/倒伏/缺測；長格式另用『死亡』，與 tree_measurement 一致保留"
     },
     "planted_date": {
       "type": ["string", "null"],
