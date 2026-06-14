@@ -1,0 +1,5 @@
+# TreeVision 後端 API 骨架依賴
+fastapi>=0.110
+uvicorn[standard]>=0.27
+# 生產改 PostgreSQL 時加：
+# psycopg[binary]>=3.1
