@@ -33,6 +33,8 @@ models/**/checkpoints/
 outputs/**/*.csv
 outputs/**/*.parquet
 outputs/**/*.json
+# 範例繪圖為可重生輸出（由 examples/ 腳本產生），不版控
+examples/plots/
 !schemas/**/*.json
 
 # ---- 本機資料庫（含客戶資料衍生，不公開） ----
@@ -45,6 +47,8 @@ annotations/**/*.json
 annotations/**/*.coco.json
 annotations/**/*.xml
 annotations/**/*.txt
+# 例外：CVAT label 設定檔屬工具設定（非標註資料），須版控
+!annotations/cvat-labels.json
 
 # ---- 報表產物 ----
 reports/**/*.pdf

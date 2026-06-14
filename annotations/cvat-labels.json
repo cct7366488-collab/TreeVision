@@ -1,0 +1,133 @@
+[
+  {
+    "name": "leaf",
+    "type": "polygon",
+    "color": "#33ddff",
+    "attributes": [
+      {
+        "name": "leaf_age",
+        "input_type": "select",
+        "mutable": true,
+        "default_value": "mature",
+        "values": ["mature", "new", "uncertain"]
+      },
+      {
+        "name": "compound_leaf_id",
+        "input_type": "text",
+        "mutable": true,
+        "default_value": ""
+      },
+      {
+        "name": "is_uncertain",
+        "input_type": "checkbox",
+        "mutable": true,
+        "default_value": "false",
+        "values": ["false", "true"]
+      }
+    ]
+  },
+  {
+    "name": "scale_object",
+    "type": "rectangle",
+    "color": "#ffcc00",
+    "attributes": [
+      {
+        "name": "scale_type",
+        "input_type": "select",
+        "mutable": false,
+        "default_value": "a4_grid",
+        "values": ["a4_grid", "coin_5twd", "coin_10twd", "ruler"]
+      }
+    ]
+  },
+  {
+    "name": "lesion",
+    "type": "polygon",
+    "color": "#a0522d",
+    "attributes": []
+  },
+  {
+    "name": "chlorosis",
+    "type": "polygon",
+    "color": "#e6d72a",
+    "attributes": []
+  },
+  {
+    "name": "necrosis",
+    "type": "polygon",
+    "color": "#3a2a1a",
+    "attributes": []
+  },
+  {
+    "name": "hole",
+    "type": "polygon",
+    "color": "#ff4d4d",
+    "attributes": []
+  },
+  {
+    "name": "canopy_other",
+    "type": "polygon",
+    "color": "#8c8c8c",
+    "attributes": []
+  },
+  {
+    "name": "veg_green",
+    "type": "polygon",
+    "color": "#2e8b57",
+    "attributes": []
+  },
+  {
+    "name": "veg_yellow",
+    "type": "polygon",
+    "color": "#d4c020",
+    "attributes": []
+  },
+  {
+    "name": "veg_brown",
+    "type": "polygon",
+    "color": "#7b4a12",
+    "attributes": []
+  },
+  {
+    "name": "plant_whole",
+    "type": "polygon",
+    "color": "#1f77b4",
+    "attributes": []
+  },
+  {
+    "name": "plant_canopy",
+    "type": "polygon",
+    "color": "#2ca02c",
+    "attributes": []
+  },
+  {
+    "name": "plant_trunk",
+    "type": "polygon",
+    "color": "#8b5a2b",
+    "attributes": []
+  },
+  {
+    "name": "kp_height_top",
+    "type": "points",
+    "color": "#ff00ff",
+    "attributes": []
+  },
+  {
+    "name": "kp_height_bottom",
+    "type": "points",
+    "color": "#ff8800",
+    "attributes": []
+  },
+  {
+    "name": "kp_crown_top",
+    "type": "points",
+    "color": "#00ffaa",
+    "attributes": []
+  },
+  {
+    "name": "kp_crown_bottom",
+    "type": "points",
+    "color": "#00aaff",
+    "attributes": []
+  }
+]

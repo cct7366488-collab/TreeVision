@@ -26,6 +26,11 @@ TreeVision 是一個結合樹冠影像、葉片近拍、AI 分割模型與健康
 | [docs/annotation-guideline.md](docs/annotation-guideline.md) | 標註規範（樹冠／葉片／病斑） |
 | [docs/api.md](docs/api.md) | REST API 介面定義 |
 | [docs/roadmap.md](docs/roadmap.md) | 開發里程碑與模型訓練計畫 |
+| [docs/leaf-analysis-math.md](docs/leaf-analysis-math.md) | 葉片影像分析判釋鏈與數學模型（影像→指標） |
+| [docs/leaf-analysis-validation-report.md](docs/leaf-analysis-validation-report.md) | 判釋鏈方法學與驗證框架（文獻佐證 + a-priori 驗證協定） |
+| [docs/annotation-plan.md](docs/annotation-plan.md) | 建模期標註集建置計畫 |
+| [docs/field-imaging-sop.md](docs/field-imaging-sop.md) | 野外影像採集 SOP（ML 可用性導向） |
+| [docs/firebase-data-mapping.md](docs/firebase-data-mapping.md) | Firebase 本機→雲端對應表與 Blaze 啟用 runbook |
 | [schemas/](schemas/) | JSON Schema 檔（image_metadata、analysis_result 等） |
 | [references/](references/) | 外部參考資料彙整（場域官方文件、試驗設計、現場 SOP） |
 
