@@ -35,6 +35,11 @@ outputs/**/*.parquet
 outputs/**/*.json
 !schemas/**/*.json
 
+# ---- 本機資料庫（含客戶資料衍生，不公開） ----
+*.db
+*.sqlite
+*.sqlite3
+
 # ---- 標註檔（資料治理優先；之後可開白名單） ----
 annotations/**/*.json
 annotations/**/*.coco.json

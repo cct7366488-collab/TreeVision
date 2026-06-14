@@ -107,6 +107,7 @@ def transform(longformat_path):
     recovered = []  # 已回收：依 RECOVERY_MAP 補回編號
     dropped = []   # 丟棄：leading_blank 空列（無量測）
     tree_last = {}  # tree_id -> (season, status) 取最後
+    stem_ctr = {}   # (base_tree, season) -> 已配發莖序數（保證 PK 唯一）
 
     for rn, r in enumerate(rows, start=2):
         site = site_dash(c(r, "林班地"))
@@ -120,8 +121,6 @@ def transform(longformat_path):
             continue
 
         base_tree = re.sub(r"-s[0-9]+$", "", code)
-        stem_m = re.search(r"-s([0-9]+)$", code)
-        stem_seq = int(stem_m.group(1)) if stem_m else 1
 
         # leading_blank_treeno 處理：回收 / 丟棄 / 隔離（見 RECOVERY_MAP 註解）
         if flag == "leading_blank_treeno" or not tree_no:
@@ -132,7 +131,7 @@ def transform(longformat_path):
                 tree_no = rec_no
                 base_tree = "%s-%s-%03d" % (short, treat, rec_no)
                 recovered.append(dict(row=rn, code=code, recovered_tree_id=base_tree,
-                                      stem_seq=stem_seq, dbh=dbh_v, height=ht_v))
+                                      dbh=dbh_v, height=ht_v))
                 # fall through：以補回之編號正常處理
             elif dbh_v is None and ht_v is None:
                 dropped.append(dict(row=rn, code=code, season=season, issue="leading_blank 空列(無量測)→丟棄"))
@@ -142,6 +141,10 @@ def transform(longformat_path):
                                issue="leading_blank 且區塊1~30已滿、編號無法確定→隔離待原表確認",
                                dbh=dbh_v, height=ht_v))
                 continue
+
+        # stem_seq：每 (tree, season) 內遇到順序計數（消除原表莖序未遞增造成的 PK 衝突）
+        stem_seq = stem_ctr.get((base_tree, season), 0) + 1
+        stem_ctr[(base_tree, season)] = stem_seq
 
         # treatment
         if treat not in treatments:
