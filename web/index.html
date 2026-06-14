@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TreeVision 儀表板（骨架）</title>
+<style>
+  :root{
+    --bg:#f6f7f5; --card:#fff; --ink:#23241f; --mut:#6b6d64; --line:#e3e4dd;
+    --c0:#888780; --p1:#378add; --f150:#1d9e75; --pf:#7f77dd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:1040px;margin:0 auto;padding:24px 18px 60px}
+  header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-size:21px;margin:0}
+  .badge{font-size:12px;padding:3px 9px;border-radius:20px;background:#eef0ea;color:var(--mut)}
+  .badge.live{background:#e1f5ee;color:#0f6e56}
+  .sub{color:var(--mut);font-size:13px;margin:4px 0 18px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .n{font-size:26px;font-weight:700}
+  .kpi .l{font-size:12px;color:var(--mut);margin-top:2px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  h2{font-size:15px;margin:0 0 4px}
+  .hint{font-size:12px;color:var(--mut);margin:0 0 14px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:8px}
+  .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .matrix{display:grid;grid-template-columns:90px repeat(4,1fr);gap:6px;font-size:13px}
+  .matrix .h{color:var(--mut);font-size:12px;align-self:center}
+  .cell{background:#f1efe8;border-radius:8px;padding:10px;text-align:center}
+  .cell b{font-size:17px}
+  .ctl{font-size:12px;color:var(--mut)}
+  .ctl input{font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;width:200px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>TreeVision 儀表板</h1>
+    <span id="src" class="badge">載入中…</span>
+  </header>
+  <p class="sub">大雪山土肉桂試驗 ｜ 修枝矮化 × 施肥 對生長影響（後端鏈骨架展示）</p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <h2>試驗對照：各處理組平均胸徑（cm）× 季別</h2>
+    <p class="hint">2×2 設計（修剪 × 施肥150g）。注意 P1F150（修剪+施肥）114Q4 胸徑下降，反映修剪當期效應。</p>
+    <div id="chart"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section>
+    <h2>處理組 × 樣區　樹數</h2>
+    <p class="hint">全場 2×2、每處理組 30 株 × 4 樣區 = 120 株；共約 480 株。</p>
+    <div class="matrix" id="matrix"></div>
+  </section>
+
+  <section>
+    <h2>場域概覽</h2>
+    <table id="sites"><thead><tr><th>樣區</th><th>林齡</th><th class="num">面積(ha)</th><th>栽植</th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <section>
+    <h2>樹木履歷範例：115121-C0-001（多幹）</h2>
+    <p class="hint">單株歷次量測（對照組）。資料層已可由 API <code>/trees/{id}</code> 取得。</p>
+    <table id="tree"><thead><tr><th>季別</th><th>莖序</th><th class="num">胸徑(cm)</th><th class="num">樹高(m)</th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <p class="ctl">API base：<input id="api" value="http://127.0.0.1:8000"> ＜空白＝僅用範例資料＞　<a href="#" id="reload">重新連線</a></p>
+</div>
+
+<script>
+// 內嵌範例資料＝2026-06-14 由本機 DB 真實查得（API 未連線時的 fallback）
+const SEASONS = ["114Q3","114Q4","115Q1"];
+const TREATS = [
+  {id:"C0",   zh:"對照",        color:"var(--c0)",   dbh:[4.83,4.84,5.72]},
+  {id:"P1",   zh:"修剪",        color:"var(--p1)",   dbh:[5.31,4.17,5.47]},
+  {id:"F150", zh:"施肥150g",    color:"var(--f150)", dbh:[4.86,4.92,5.13]},
+  {id:"P1F150",zh:"修剪+施肥",  color:"var(--pf)",   dbh:[4.84,3.13,4.92]},
+];
+let DATA = {
+  kpis:{sites:4, trees:480, treatments:4, measurements:1820},
+  treats:TREATS,
+  sites:[
+    {site_id:"115-12-1",age_class:"成熟林",area_ha:0.5,planted_date:"2010-10"},
+    {site_id:"117-28-1",age_class:"幼齡林",area_ha:0.355,planted_date:"2025-04"},
+    {site_id:"8-1-1",age_class:"幼齡林",area_ha:0.2372,planted_date:"2024-03"},
+    {site_id:"8-1-10",age_class:"幼齡林",area_ha:0.4482,planted_date:"2024-03"},
+  ],
+  matrix:{"C0":30,"P1":30,"F150":30,"P1F150":30}, // 每樣區每處理
+  tree:[
+    ["114Q3",1,10.3,6.2],["114Q3",2,8.6,6.1],["114Q3",3,8.3,5.8],
+    ["114Q4",1,11.9,6.5],["114Q4",2,10.4,6.4],
+    ["115Q1",1,10.9,6.5],["115Q1",2,13.3,7.5],
+  ],
+};
+
+function el(t,c,h){const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+
+function render(){
+  // KPIs
+  const k=DATA.kpis, kc=document.getElementById("kpis"); kc.innerHTML="";
+  [["樣區",k.sites],["樣樹",k.trees],["處理組",k.treatments],["量測筆數",k.measurements.toLocaleString()]]
+    .forEach(([l,n])=>{const d=el("div","kpi");d.append(el("div","n",n),el("div","l",l));kc.append(d);});
+
+  // chart：以季別分組，每組 4 處理組 bar
+  const W=920,H=210,pad=34,gh=H-pad-18,max=6;
+  const gw=(W-40)/SEASONS.length, bw=gw/(DATA.treats.length+1);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="各處理組平均胸徑長條圖">`;
+  for(let g=0;g<6;g++){const y=H-pad-(g/max)*gh;s+=`<line x1="28" y1="${y}" x2="${W}" y2="${y}" stroke="var(--line)"/><text x="22" y="${y+3}" font-size="9" fill="var(--mut)" text-anchor="end">${g}</text>`;}
+  SEASONS.forEach((se,si)=>{
+    const x0=40+si*gw;
+    DATA.treats.forEach((t,ti)=>{
+      const v=t.dbh[si], bx=x0+ti*bw+8, by=H-pad-(v/max)*gh, bh=(v/max)*gh;
+      s+=`<rect x="${bx}" y="${by}" width="${bw-3}" height="${bh}" rx="2" fill="${t.color}"><title>${t.id} ${se}：${v} cm</title></rect>`;
+      s+=`<text x="${bx+(bw-3)/2}" y="${by-3}" font-size="8.5" fill="var(--mut)" text-anchor="middle">${v}</text>`;
+    });
+    s+=`<text x="${x0+gw/2-4}" y="${H-pad+14}" font-size="11" fill="var(--ink)" text-anchor="middle">${se}</text>`;
+  });
+  s+="</svg>";
+  document.getElementById("chart").innerHTML=s;
+  document.getElementById("legend").innerHTML=DATA.treats.map(t=>`<span><span class="sw" style="background:${t.color}"></span>${t.id}（${t.zh}）</span>`).join("");
+
+  // matrix
+  const m=document.getElementById("matrix");m.innerHTML="";
+  m.append(el("div","h","樣區＼處理"));
+  DATA.treats.forEach(t=>m.append(el("div","h",t.id)));
+  DATA.sites.forEach(si=>{
+    m.append(el("div","h",si.site_id));
+    DATA.treats.forEach(t=>m.append(el("div","cell",`<b>${DATA.matrix[t.id]||"–"}</b>`)));
+  });
+
+  // sites
+  const sb=document.querySelector("#sites tbody");sb.innerHTML="";
+  DATA.sites.forEach(si=>{const r=el("tr");r.innerHTML=`<td>${si.site_id}</td><td>${si.age_class||""}</td><td class="num">${si.area_ha??""}</td><td>${si.planted_date||""}</td>`;sb.append(r);});
+
+  // tree
+  const tb=document.querySelector("#tree tbody");tb.innerHTML="";
+  DATA.tree.forEach(r=>{const tr=el("tr");tr.innerHTML=`<td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td>`;tb.append(tr);});
+}
+
+async function initLive(){
+  const base=document.getElementById("api").value.trim();
+  const badge=document.getElementById("src");
+  if(!base){badge.className="badge";badge.textContent="範例資料";render();return;}
+  try{
+    const h=await fetch(base+"/health").then(r=>r.json());
+    if(!h.db_ready) throw new Error("db not ready");
+    const [sites,...sums]=await Promise.all([
+      fetch(base+"/sites").then(r=>r.json()),
+      ...TREATS.map(t=>fetch(base+"/treatments/"+t.id+"/summary").then(r=>r.json())),
+    ]);
+    DATA.sites=sites.map(s=>({site_id:s.site_id,age_class:s.age_class==="mature"?"成熟林":(s.age_class==="juvenile"?"幼齡林":""),area_ha:s.area_ha,planted_date:s.planted_date}));
+    DATA.treats=TREATS.map((t,i)=>({...t,dbh:SEASONS.map(se=>{const row=sums[i].find(x=>x.season===se);return row?row.dbh_mean:0;})}));
+    badge.className="badge live";badge.textContent="● 連線 API";
+  }catch(e){
+    badge.className="badge";badge.textContent="範例資料（API 未連線）";
+  }
+  render();
+}
+
+document.getElementById("reload").onclick=(e)=>{e.preventDefault();initLive();};
+initLive();
+</script>
+</body>
+</html>

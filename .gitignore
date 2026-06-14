@@ -100,9 +100,10 @@ yarn-error.log*
 .turbo/
 dist/
 
-# ---- IDE / OS ----
+# ---- IDE / OS / 本地工具 ----
 .vscode/
 .idea/
+.claude/
 .DS_Store
 Thumbs.db
 desktop.ini
