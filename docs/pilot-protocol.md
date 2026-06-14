@@ -179,6 +179,7 @@ robocopy $src $dst *.jpg /XO
 ## 陸、參考資源
 
 - 林業及自然保育署「樣區設置與調查作業手冊」
+- **[野外影像採集 SOP（ML 可用性導向）](field-imaging-sop.md)**（相機設定/構圖/光照/立體多視角/NG 對照＋參考影像）
 - [ADR-0005 固定攝點 SOP](decisions/0005-fixed-camera-station-sop.md)（攝點規格權威）
 - IPCC 2006 Guidelines（LULUCF）森林樣區建議
 
