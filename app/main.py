@@ -9,9 +9,9 @@ TreeVision API 骨架（read-only，v0.1）。
     uvicorn app.main:app --reload
     # 文件 UI： http://127.0.0.1:8000/docs
 """
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Body
 
-from . import db
+from . import db, ingest
 
 app = FastAPI(
     title="TreeVision API（骨架）",
@@ -102,3 +102,53 @@ def treatment_summary(treatment_id: str):
         "FROM tree_measurement m JOIN tree t ON t.tree_id = m.tree_id "
         "WHERE t.treatment_id = ? AND m.dbh_cm IS NOT NULL "
         "GROUP BY m.season ORDER BY m.season", (treatment_id,))
+
+
+@app.get("/images", tags=["影像"])
+def list_images(
+    tree_id: str | None = None,
+    quality_pass: bool | None = None,
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+):
+    _require_db()
+    where, params = [], []
+    if tree_id:
+        where.append("tree_id = ?"); params.append(tree_id)
+    if quality_pass is not None:
+        where.append("quality_pass = ?"); params.append(1 if quality_pass else 0)
+    clause = ("WHERE " + " AND ".join(where)) if where else ""
+    params += [limit, offset]
+    return db.query(
+        "SELECT image_id, tree_id, capture_type, view, width_px, height_px, "
+        "quality_pass, quality_issues, ingested_at FROM image {} "
+        "ORDER BY image_id LIMIT ? OFFSET ?".format(clause), tuple(params))
+
+
+@app.get("/images/quality-summary", tags=["影像"])
+def image_quality_summary():
+    """入庫影像品質彙總：合格數、待補拍數、各問題類型計數。"""
+    _require_db()
+    total = db.query_one("SELECT COUNT(*) AS n FROM image")["n"]
+    npass = db.query_one("SELECT COUNT(*) AS n FROM image WHERE quality_pass=1")["n"]
+    issues = {}
+    for row in db.query("SELECT quality_issues FROM image WHERE quality_issues <> ''"):
+        for it in row["quality_issues"].split(","):
+            issues[it] = issues.get(it, 0) + 1
+    return {"total": total, "quality_pass": npass, "flagged": total - npass, "issues": issues}
+
+
+@app.post("/images/validate-metadata", tags=["影像"])
+def validate_image_metadata(meta: dict = Body(...)):
+    """拍攝前預驗 metadata：schema 合規 + tree/campaign 是否存在 DB（不需影像檔）。"""
+    _require_db()
+    schema_errors = ingest.validate_metadata(meta)
+    fk_errors = []
+    tid = meta.get("tree_id")
+    if tid and not db.query_one("SELECT 1 AS x FROM tree WHERE tree_id = ?", (tid,)):
+        fk_errors.append("tree_id 不存在於 DB: {}".format(tid))
+    cid = meta.get("campaign_id")
+    if cid and not db.query_one("SELECT 1 AS x FROM campaign WHERE campaign_id = ?", (cid,)):
+        fk_errors.append("campaign_id 不存在於 DB: {}".format(cid))
+    return {"valid": not (schema_errors or fk_errors),
+            "schema_errors": schema_errors, "fk_errors": fk_errors}

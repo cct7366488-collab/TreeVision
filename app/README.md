@@ -37,5 +37,18 @@ uvicorn app.main:app --reload
 | GET | `/trees` | 樹列表（可篩 `site_id` / `treatment_id`，分頁）|
 | GET | `/trees/{tree_id}` | 單樹 + 歷次量測 |
 | GET | `/treatments/{treatment_id}/summary` | 各季別平均胸徑/樹高（試驗對照雛形）|
+| GET | `/images` | 入庫影像列表（可篩 `tree_id` / `quality_pass`，分頁）|
+| GET | `/images/quality-summary` | 影像品質彙總（合格/待補拍/各問題計數）|
+| POST | `/images/validate-metadata` | 拍攝前預驗 metadata（schema + tree/campaign FK）|
+
+## 影像入庫管線
+
+現場影像進系統的第一站：[`app/ingest.py`](ingest.py)（核心）＋ [`scripts/ingest_images.py`](../scripts/ingest_images.py)（批次 CLI）。
+流程：metadata schema 驗證 → DB 參照比對 → 品質檢查（解析度/模糊/曝光）→ 入庫。
+metadata/FK 錯誤即拒收；品質問題仍入庫但標記 `quality_pass=False` 待補拍。
+
+```powershell
+python scripts/ingest_images.py --metadata <meta.csv> --images-dir <影像資料夾>
+```
 
 > DB 來源預設 `outputs/treevision.db`（gitignored）；可用環境變數 `TREEVISION_DB` 指定。

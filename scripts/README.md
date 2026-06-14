@@ -7,6 +7,7 @@
 | `_extract_refs.py` | 從 DOCX/XLSX/PPTX 萃取 `references/` 來源檔內容 |
 | `etl_longformat_to_entities.py` | 土肉桂試驗「長格式」XLSX → v0.2 六實體（treatment/site/plot/tree/tree_measurement/campaign），逐筆 schema 驗證 + DQ 報告。輸入以 `--longformat`／env `TREEVISION_LONGFORMAT` 指定（不硬編客戶路徑）；輸出至 `outputs/entities/`（gitignored，客戶資料衍生不上雲）|
 | `load_entities_to_db.py` | 把上述 6 實體 CSV 載入關聯式資料庫（本機 SQLite，套用 [`db/schema.sql`](../db/schema.sql)），驗 FK 完整性 + 健全性查詢。生產改 PostgreSQL 用同一 DDL。DB 輸出 `outputs/treevision.db`（gitignored）|
+| `ingest_images.py` | 批次影像入庫：讀 metadata CSV + 影像資料夾，逐張 metadata 驗證＋FK 比對＋品質檢查（解析度/模糊/曝光）後寫入 DB `image` 表。核心邏輯於 [`app/ingest.py`](../app/ingest.py)|
 
 ## 預期腳本（待實作）
 

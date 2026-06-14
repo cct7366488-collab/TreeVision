@@ -87,8 +87,37 @@ CREATE TABLE IF NOT EXISTS tree_measurement (
     PRIMARY KEY (tree_id, season, stem_seq)
 );
 
+-- ── 影像層（入庫管線）──────────────────────────────────────
+-- 接收現場影像的第一站：metadata 驗證 + FK 比對 + 品質檢查後入此表。
+-- station_id 暫不設 FK（fixed_camera_station 俟攝點建置後才有資料）。
+CREATE TABLE IF NOT EXISTS image (
+    image_id         TEXT PRIMARY KEY,
+    tree_id          TEXT NOT NULL REFERENCES tree(tree_id),
+    plot_id          TEXT REFERENCES plot(plot_id),
+    treatment_id     TEXT REFERENCES treatment(treatment_id),
+    campaign_id      TEXT REFERENCES campaign(campaign_id),
+    station_id       TEXT,
+    capture_type     TEXT CHECK (capture_type IN ('canopy','leaf_closeup','whole_plant','scale_ref')),
+    capture_datetime TEXT,
+    view             TEXT,
+    device_id        TEXT,
+    storage_uri      TEXT,
+    width_px         INTEGER,
+    height_px        INTEGER,
+    file_size_bytes  INTEGER,
+    sha256           TEXT,
+    brightness_mean  DOUBLE PRECISION,
+    blur_var         DOUBLE PRECISION,
+    quality_pass     BOOLEAN,
+    quality_issues   TEXT,
+    ingested_at      TEXT
+);
+
 -- ── 索引 ────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_tree_plot        ON tree(plot_id);
 CREATE INDEX IF NOT EXISTS idx_tree_treatment   ON tree(treatment_id);
 CREATE INDEX IF NOT EXISTS idx_meas_season      ON tree_measurement(season);
 CREATE INDEX IF NOT EXISTS idx_meas_campaign    ON tree_measurement(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_image_tree       ON image(tree_id);
+CREATE INDEX IF NOT EXISTS idx_image_campaign    ON image(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_image_station     ON image(station_id);

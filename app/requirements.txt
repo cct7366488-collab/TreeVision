@@ -1,5 +1,10 @@
 # TreeVision 後端 API 骨架依賴
 fastapi>=0.110
 uvicorn[standard]>=0.27
+# 影像入庫管線（品質檢查、metadata 驗證）
+pillow>=10.0
+numpy>=1.24
+scipy>=1.10
+jsonschema>=4.20
 # 生產改 PostgreSQL 時加：
 # psycopg[binary]>=3.1
