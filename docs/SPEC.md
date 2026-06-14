@@ -711,6 +711,7 @@ ExperimentAnovaResult（F、p、effect size）
 - A：[資料 schema 完整定義](data-schema.md)
 - B：[REST API 完整定義](api.md)
 - C：[標註規範](annotation-guideline.md)
+- C-2：[**葉片影像分析判釋鏈與數學模型**（v0.2 NEW）](leaf-analysis-math.md)
 - D：[系統架構](architecture.md)
 - E：[路線圖](roadmap.md)
 - F：[**場域脈絡與試驗設計彙整**（v0.2 NEW）](../references/cinnamon-trial-context.md)
