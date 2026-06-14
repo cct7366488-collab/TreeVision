@@ -25,9 +25,10 @@
 |---|------|------|--------|
 | [0001](0001-open-questions.md) | SPEC 開放問題的初版建議 | accepted | 2026-04-30 |
 | [0002](0002-site-species-application-scope.md) | 場域、樹種與應用場景定向（鎖定大雪山土肉桂試驗） | **accepted** | 2026-05-04 |
-| [0003](0003-schema-alignment-with-xlsx.md) | 資料模型對齊既有 XLSX 調查表 schema | proposed | — |
-| [0004](0004-experimental-response-metrics.md) | 試驗響應指標體系（14 項影像可推得指標） | proposed | — |
-| [0005](0005-fixed-camera-station-sop.md) | 固定攝點 SOP（試驗監測前提） | proposed | — |
+| [0003](0003-schema-alignment-with-xlsx.md) | 資料模型對齊既有 XLSX 調查表 schema | **accepted** | 2026-06-13 |
+| [0004](0004-experimental-response-metrics.md) | 試驗響應指標體系（14 項影像可推得指標） | **accepted** | 2026-06-13 |
+| [0005](0005-fixed-camera-station-sop.md) | 固定攝點 SOP（試驗監測前提） | **accepted** | 2026-06-13 |
+| [0006](0006-image-sampling-design.md) | 影像抽樣設計與樣本數 | proposed | （待 Pilot）|
 
 ## 附帶文件
 

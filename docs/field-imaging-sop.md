@@ -4,7 +4,7 @@
 |------|------|
 | 適用 | TreeVision 土肉桂試驗固定攝點拍攝 |
 | 目的 | 確保每張影像「可重現、可量測、可比較」，達到模型訓練可用標準 |
-| 相關 | [pilot-protocol.md](pilot-protocol.md)（當日工序）、[ADR-0005](decisions/0005-fixed-camera-station-sop.md)（攝點規格）|
+| 相關 | [pilot-protocol.md](pilot-protocol.md)（當日工序）、[ADR-0005](decisions/0005-fixed-camera-station-sop.md)（攝點規格）、[ADR-0006](decisions/0006-image-sampling-design.md)（抽樣與樣本數、背景處理、葉片三階段）|
 
 > **核心觀念**：模型只能從影像裡「真實存在且一致」的訊號學習。模糊、過曝、角度每次不同的影像，會把真正的生長訊號淹沒在拍攝雜訊裡，導致模型學不到、或學錯。**拍攝品質直接決定模型上限。**
 
