@@ -34,7 +34,9 @@
 }
 ```
 
-備援可接受 [labelme](https://github.com/wkentaro/labelme) JSON 格式（每影像一檔），透過 `scripts/labelme_to_coco.py` 轉換。
+> **類別名稱權威來源＝[`cvat-labels.json`](cvat-labels.json)**（17 個 label）：`leaf`、`scale_object`、`lesion`、`chlorosis`、`necrosis`、`hole`、`canopy_other`／`veg_green`／`veg_yellow`／`veg_brown`、`plant_whole`／`plant_canopy`／`plant_trunk`、4 個 `kp_*` 關鍵點。上方各子目錄為概念分組，實際 COCO category 名以此檔為準。
+
+匯入：CVAT 匯出 COCO 1.0 → [`scripts/import_coco.py`](../scripts/import_coco.py)（入 DB `annotation_set`／`annotation` 兩表，未知類別即報錯、`--skip-image-fk` 回報孤兒標註）。備援 [labelme](https://github.com/wkentaro/labelme) JSON（每影像一檔）可用 [`scripts/labelme_to_coco.py`](../scripts/labelme_to_coco.py) 合併轉成 COCO 1.0 再餵 import_coco（polygon/rectangle/point 對應、未知 label 報錯）。
 
 ## 規範
 

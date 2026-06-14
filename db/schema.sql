@@ -113,6 +113,40 @@ CREATE TABLE IF NOT EXISTS image (
     ingested_at      TEXT
 );
 
+-- ── 標註層（標註集匯入：CVAT COCO / labelme → DB）──────────────
+-- 影像標註的落點。annotation_set 記錄每次匯入批次；annotation 存單一標註幾何。
+-- category 對齊 annotations/cvat-labels.json 之 17 個 label 名稱（CVAT 匯出即用此名）。
+-- annotation.image_id 參照 image 表；尚無影像入庫時，import_coco.py --skip-image-fk
+-- 可先匯入並回報「孤兒標註」（image_id 不在 image 表者），待影像就緒再對齊。
+CREATE TABLE IF NOT EXISTS annotation_set (
+    set_id            TEXT PRIMARY KEY,
+    source_file       TEXT,
+    source_format     TEXT CHECK (source_format IN ('coco','labelme')),
+    annotator         TEXT,
+    image_count       INTEGER,
+    annotation_count  INTEGER,
+    imported_at       TEXT,
+    note              TEXT
+);
+
+CREATE TABLE IF NOT EXISTS annotation (
+    annotation_id  TEXT PRIMARY KEY,
+    set_id         TEXT NOT NULL REFERENCES annotation_set(set_id),
+    image_id       TEXT NOT NULL REFERENCES image(image_id),
+    category       TEXT NOT NULL CHECK (category IN (
+                       'leaf','scale_object','lesion','chlorosis','necrosis','hole',
+                       'canopy_other','veg_green','veg_yellow','veg_brown',
+                       'plant_whole','plant_canopy','plant_trunk',
+                       'kp_height_top','kp_height_bottom','kp_crown_top','kp_crown_bottom')),
+    geom_type      TEXT CHECK (geom_type IN ('polygon','rectangle','points')),
+    bbox           TEXT,             -- JSON [x,y,w,h]
+    segmentation   TEXT,             -- JSON（polygon 點串）
+    keypoints      TEXT,             -- JSON（points 類）
+    area           DOUBLE PRECISION,
+    attributes     TEXT,             -- JSON（leaf_age / scale_type / compound_leaf_id / is_uncertain…）
+    is_crowd       INTEGER CHECK (is_crowd IN (0,1))
+);
+
 -- ── 索引 ────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_tree_plot        ON tree(plot_id);
 CREATE INDEX IF NOT EXISTS idx_tree_treatment   ON tree(treatment_id);
@@ -121,3 +155,6 @@ CREATE INDEX IF NOT EXISTS idx_meas_campaign    ON tree_measurement(campaign_id)
 CREATE INDEX IF NOT EXISTS idx_image_tree       ON image(tree_id);
 CREATE INDEX IF NOT EXISTS idx_image_campaign    ON image(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_image_station     ON image(station_id);
+CREATE INDEX IF NOT EXISTS idx_anno_image        ON annotation(image_id);
+CREATE INDEX IF NOT EXISTS idx_anno_category     ON annotation(category);
+CREATE INDEX IF NOT EXISTS idx_anno_set          ON annotation(set_id);

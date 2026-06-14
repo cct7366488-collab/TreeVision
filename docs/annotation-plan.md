@@ -18,7 +18,7 @@
 |------|---------|---------|------|
 | LeafInst | `leaf_macro`（離體平鋪）+ `whole_plant` | 實例分割（每片葉）+ 尺度物偵測 | leaf、scale_object（4 型）|
 | LeafDefect | `leaf_macro` 切出之單葉 ROI | 多標籤分割 | lesion／chlorosis／necrosis／hole |
-| CanopySeg | `canopy`、`whole_plant` | 語義分割（5 類）| canopy_other／veg_green／veg_yellow／veg_brown |
+| CanopySeg | `canopy`、`whole_plant` | 語義分割（4 前景類＋背景）| canopy_other／veg_green／veg_yellow／veg_brown |
 | PlantStructure | `whole_plant` | 全株分割 + 株頂/株底/樹冠關鍵點 | whole／canopy／trunk + keypoints |
 
 > 葉齡（嫩葉/成熟葉，對應 [ADR-0004](decisions/0004-experimental-response-metrics.md) A2/A3）以 LeafInst 之 `leaf_age` **屬性**標註，不另設類別。
@@ -71,12 +71,12 @@
 
 一、**主工具 CVAT**（[標註規範 §伍](annotation-guideline.md)）；label 設定檔 [annotations/cvat-labels.json](../annotations/cvat-labels.json) 可直接匯入（Project → Raw → 貼上）。
 
-二、**匯出 COCO 1.0** → 經 `scripts/labelme_to_coco.py`／`import_coco.py` 匯入 TreeVision（[annotations/README](../annotations/README.md)）。
+二、**匯出 COCO 1.0** → 經 [`scripts/import_coco.py`](../scripts/import_coco.py) 匯入 TreeVision DB（`annotation_set` / `annotation` 兩表；含 label 對照 cvat-labels.json、image FK／`--skip-image-fk` 孤兒回報、各類別實例統計、`--selftest` 自我驗證）。labelme JSON 為備援格式，可用 [`scripts/labelme_to_coco.py`](../scripts/labelme_to_coco.py) 把每影像一檔合併轉成 COCO 再餵 import_coco（[annotations/README](../annotations/README.md)）。
 
-三、**二人交叉複標**：隨機 5% 樣本雙標，計 IoU 一致性。
+三、**二人交叉複標**：隨機 5% 樣本雙標，以 [`scripts/annotation_agreement.py`](../scripts/annotation_agreement.py) 計 IoU 一致性（兩位標註者各匯出 COCO → 比對；bbox 解析式 IoU、polygon 網格化 IoU、貪婪配對、依 §伍 門檻判 pass/fail）。
 
 ```
-原始影像 → 標註者 A → 隨機 5% 進 B 複標 → 計 IoU
+原始影像 → 標註者 A → 隨機 5% 進 B 複標 → annotation_agreement.py 計 IoU
                                          ↓ < 門檻
                                    討論 → 修訂規範 → 重標
 ```
@@ -93,6 +93,8 @@
 | 誤標率 | < 5% | 同上 |
 | 病徵類別最小實例數 | 各 ≥ 100 | 本計畫 §貳-一 |
 
+> 上表 IoU 門檻由 [`scripts/annotation_agreement.py`](../scripts/annotation_agreement.py) 自動計算判定（病徵 ≥0.55／葉片·樹冠·全株·尺度物 ≥0.85／漏標+誤標率 <5%）。
+>
 > 標註集通過上述門檻後，方進模型訓練；訓練後模型再以 [SPEC §玖](SPEC.md) 驗收標準（mIoU/mAP/MAPE）評估。
 
 ---
@@ -123,3 +125,6 @@
 | 日期 | 版本 | 變更 |
 |------|------|------|
 | 2026-06-14 | v0.1 | 初版：四模型標註需求、建模期數量目標（葉片 400–600 片/病徵各 ≥100、全株 300–500 張）、抽樣防偏、CVAT 工作流、標註集品質門檻、資料夾對應。落地 ADR-0006 未解決問題 #5 |
+| 2026-06-14 | v0.2 | 標註匯入管線落地：`db/schema.sql` 新增 `annotation_set` / `annotation` 兩表（category 對齊 cvat-labels.json 17 label、image FK＋孤兒回報）；新增 [`scripts/import_coco.py`](../scripts/import_coco.py)（CVAT COCO 1.0→DB，`--selftest` 3 情境通過）；補 `annotations/` 子目錄骨架（leaf_instance／scale_object／4 病徵／whole_plant）；修正 CanopySeg 類別數標示（4 前景類＋背景）|
+| 2026-06-14 | v0.3 | 一致性驗收工具落地：新增 [`scripts/annotation_agreement.py`](../scripts/annotation_agreement.py)（兩標註者 COCO 對比，bbox 解析式 IoU＋polygon 網格化 IoU、貪婪配對、依 §伍 門檻判 pass/fail、`--selftest` 通過）；§肆-三／§伍 接入工具。操作化 §伍 品質門檻與 §肆-三 交叉複標工作流 |
+| 2026-06-14 | v0.4 | 備援格式轉換器落地：新增 [`scripts/labelme_to_coco.py`](../scripts/labelme_to_coco.py)（labelme 每影像 JSON → 合併 COCO 1.0；polygon/rectangle/point 對應、未知 label 報錯、`--selftest`）；三支腳本外部 JSON 讀取改 `utf-8-sig` 容忍 BOM；端到端 labelme→COCO→import_coco 整合驗證通過 |
